@@ -1,15 +1,53 @@
+/**
+ * @file D3 Heatmap Generation Module
+ * @author [Daniel Luft]{@link https://github.com/daluf}
+ */
+
+/**
+ * Create an instance of HeatmapGenerator.
+ * @param {Object} [settings] Object which holds all settings for the HeatmapGenerator
+ * @param {color} [settings.minColor] Color of the lowest datapoint in the heatmap - as HEX, RGB or CSS color code
+ * @param {color} [settings.maxColor] Color of the highest datapoint in the heatmap - as HEX, RGB or CSS color code
+ * @param {int} [settings.colorMode] Selects the way the colors are generated (1 => linear, 2 => sqrt or 3 => cubehelix)
+ * @param {float} [settings.gutterSize] Defines the space inbetween the square (0 - 1) (not for yearly)
+ * @param {float} [settings.outerSize] Defines the space inbetween the axis and the square (0 - 1) (not for yearly)
+ * @param {float} [settings.scale] Defines the size of the heatmap
+ * @param {boolean} [settings.showLines] Show axis lines? (not for yearly)
+ * @param {boolean} [settings.showTicks] Show axis ticks? (not for yearly)
+ * @param {String} [settings.locale] Locale - language used for months, weekdays and date formats
+ * @param {String} [settings.dayNameLength] Defines the weekday format (long => "Friday", short => "Fri" or narrow => "F")
+ * @param {boolean} [settings.showMonth] Show the months?
+ * 
+ * @example 
+ * const heatmap = new HeatmapGenerator({
+ *     minColor: "#ECF5E2", // lowest datapoint's color in the heatmap - e.g. rgb(0, 255, 0) or #00ff00
+ *     maxColor: "#222081", // highest datapoint's color in the heatmap - e.g. rgb(255, 255, 0) or #ffff00
+ *     colorMode: 2, // switches between color scales (1: linear, 2: sqrt and 3: cubehelix)
+ *     
+ *     gutterSize: 0.1, // distance inbetween the squares (range: 0-1)
+ *     outerSize: 0.35, // distance inbetween axis x, y and the squares
+ *     scale: 0.8, // scale of the heatmap
+ *     
+ *     showLines: false, // show the axis line
+ *     showTicks: true, // show the axis ticks
+ *     locale: "de-DE", // defines the format of the date in the axis
+ *     dayNameLength: "short", // style of the displayed weekday, options => long: "Friday", short: "Fri", narrow: "F" (uses locale)
+ *     showMonth: true, // displays the months (uses locale)
+ * })
+ * 
+ * @class
+ */
 class HeatmapGenerator {
 	constructor(settings = {}) {
 		this.hours = d3.range(24);
 
-		this.baseColor = settings.baseColor || "#ECF5E2";
-		this.fadeColor = settings.fadeColor || "#222081";
+		this.minColor = settings.minColor || "#ECF5E2";
+		this.maxColor = settings.maxColor || "#222081";
 		this.colorMode = settings.colorMode || 2;
 
 		this.gutterSize = settings.gutterSize || 0.1;
 		this.outerSize = settings.outerSize || 0.35;
 		this.scale = settings.scale || 1;
-		this.cubeSize = settings.cubeSize || 24;
 
 		this.showLines = settings.showLines || false;
 		this.showTicks = settings.showTicks || true;
@@ -25,6 +63,13 @@ class HeatmapGenerator {
 			.style("display", "none");
 	}
 
+	/**
+	 * Creates a Heatmap of atleast one Week (multiple possible)
+	 *
+	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
+	 * @param {Object} data
+	 * @memberof HeatmapGenerator
+	 */
 	weekly(container_id, data) {
 		const self = this;
 
@@ -129,7 +174,7 @@ class HeatmapGenerator {
 				.attr("class", "dateLine")
 				.call(yAxis);
 
-			// add cubes to heatmap
+			// add square to heatmap
 			svg.selectAll()
 				.data(weekData)
 				.enter()
@@ -160,7 +205,14 @@ class HeatmapGenerator {
 			}
 		}
 	}
-
+	
+	/**
+	 * Creates a Heatmap of atleast one Month (multiple possible)
+	 *
+	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
+	 * @param {Object} data
+	 * @memberof HeatmapGenerator
+	 */
 	monthly(container_id, data) {
 		const self = this;
 
@@ -293,7 +345,7 @@ class HeatmapGenerator {
 					.attr("y", -45);
 			}
 
-			// add cubes to heatmap
+			// add square to heatmap
 			svg.selectAll()
 				.data(monthData)
 				.enter()
@@ -360,6 +412,13 @@ class HeatmapGenerator {
 		}
 	}
 
+	/**
+	 * Creates a Heatmap of one Year
+	 *
+	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
+	 * @param {YearlyData} data
+	 * @memberof HeatmapGenerator
+	 */
 	yearly(container_id, data) {
 		const self = this;
 		const tooltipDiv = d3.select("#tooltipDiv");
@@ -369,9 +428,9 @@ class HeatmapGenerator {
 		data = data.data || [];
 
 		// set our margin's, width and height
-		const margin = { left: 85, right: 0, top: 25, bottom: 0 };
-		const width = 52 * (this.cubeSize * this.scale) + (margin.left + margin.right) + (12 * this.cubeSize);
-		const height = 7 * (this.cubeSize * this.scale) + (margin.top + margin.bottom);
+		const margin = { left: 85, right: 0, top: this.showMonth ? 25 : 0, bottom: 0 };
+		const width = 52 * (25 * this.scale) + (margin.left + margin.right) + (12 * 25);
+		const height = 7 * (25 * this.scale) + (margin.top + margin.bottom);
 
 		// create localized weekdays (mo - fr)
 		let days = [];
@@ -403,30 +462,38 @@ class HeatmapGenerator {
 			.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
 			.join("text")
 			.attr("x", -5)
-			.attr("y", (d, i) => { return (d + 0.5) * (this.cubeSize * this.scale) + (i * this.gutterSize); })
+			.attr("y", (d, i) => { return (d + 0.5) * (25 * this.scale) + (i * this.gutterSize); })
 			.attr("dy", "0.31em") // give it a little y space from top
 			.text(formatDay);
 
-		// needed to add missing data
+		// sort by date - needed to add missing data
 		data.sort((a, b) => {
-			return a.date - b.date
-		})
+			return a.date - b.date;
+		});
 
-		const oldest = data[0].date;
+		// get the oldest available date
+		const oldest = new Date(data[0].year, data[0].month, data[0].day).getTime();
+
+		// go through all 365 days
 		for (let i = 0; i < 365; i++) {
+			// create date for day
 			const date = new Date(oldest + (i * 86400000));
 
 			const day = date.getUTCDate() + 1;
 			const month = date.getUTCMonth();
 			const year = date.getUTCFullYear();
 
-			if (!data.find(el => el.day === day && el.month === month && el.year === year)) {
+			// try to find the index of given date
+			const itemIndex = data.findIndex(el => el.day === day && el.month === month && el.year === year);
+			if (itemIndex === -1) {
+				// day does not exist - lets create and push it
 				data.push({
-					date: date.getTime(),
 					day: day,
 					month: month,
 					year: year,
 					value: 0,
+					date: date.getTime(),
+					filled: true,
 				});
 			}
 		}
@@ -436,7 +503,7 @@ class HeatmapGenerator {
 			return a.month - b.month
 		});
 
-		// add the cubes
+		// add the squares
 		svg.selectAll()
 			.data(data)
 			.enter()
@@ -446,19 +513,19 @@ class HeatmapGenerator {
 				// d3.utcYear => gets the start of the year (e.g. Jan 01 2019)
 				const date = new Date(d.date);
 
-				// returns current week of the year * cubeSize
-				return (d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth()) * (self.cubeSize * self.scale);
-				// return (d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.cubeSize * self.scale)) + d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.gutterSize);
+				// returns current week of the year * squareize
+				return (d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth()) * (25 * self.scale);
+				// return (d3.utcMonday.count(d3.utcYear(d.date), d.date) * (25 * self.scale)) + d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.gutterSize);
 			})
 			.attr("y", function (d) {
-				// returns the day of the given date of the week (0-6, monday-sunday) * cubeSize to set the Y position (Monday at the top, Sunday at the bottom)
-				return (getDayOfDate(d.date) * (self.cubeSize * self.scale) + 0.5) + getDayOfDate(d.date) * (self.gutterSize);
+				// returns the day of the given date of the week (0-6, monday-sunday) * squareize to set the Y position (Monday at the top, Sunday at the bottom)
+				return (getDayOfDate(d.date) * (25 * self.scale) + 0.5) + getDayOfDate(d.date) * (self.gutterSize);
 			})
 			.attr("style", function (d, i) {
 				return `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
 			})
-			.attr("width", (this.cubeSize * this.scale) - (1* this.scale) )
-			.attr("height", (this.cubeSize * this.scale) - (1* this.scale) )
+			.attr("width", (25 * this.scale) - (1* this.scale) )
+			.attr("height", (25 * this.scale) - (1* this.scale) )
 			.style("fill", function(d) {
 				// returns the color from the color scale
 				return self.getColor(minValue, maxValue, d.value);
@@ -471,68 +538,24 @@ class HeatmapGenerator {
 					.style("top", `${event.pageY - 40}px`);
 			});
 		
-		// add the month labels
-		svg.selectAll()
-			.data(d3.utcMonths(new Date(data[0].year, 0, 0), new Date(data[0].year, 12, 0)))
-			.enter()
-			.append("text")
-			.attr("x", function (d, i) {
-				// timeWeek.count(d3.utcYear(d), timeWeek.ceil(d))
-				// d3.utcMonday.count(d3.utcYear(d), d3.utcMonday.ceil(d))
-				const date = new Date(d);
-				
-				// d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth())
-				const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
-				return pos * (self.cubeSize * self.scale);
-			})
-			.attr("y", -5)
-			.text(formatMonth);
-
-		/*data.sort((a, b) => {
-			return a.date - b.date;
-		});
-
-		const monthsToPath = d3.utcMonths(d3.utcMonth(data[0].date), data[Object.keys(data).length - 1].date);
-		monthsToPath.sort((a, b) => {
-			const dateA = new Date(a);
-			const dateB = new Date(b);
-			return dateA - dateB;
-		});
-
-		const monthPath = svg.append("g")
-			.selectAll("g")
-			.data(monthsToPath)
-			.join("g");
-			
-		monthPath.filter((d, i) => i).append("path")
-			.attr("fill", "none")
-			.attr("stroke", "white")
-			.attr("stroke-width", 3 * this.scale)
-			.attr("d", (d, i) => {
-				// amount of days
-				const days = 7;
-				// day when the month starts
-				const dayOfTheWeek = getDayOfDate(d);
-				// week in current year
-				const weekOfYear = d3.utcMonday.count(d3.utcYear(d), d);
-				
-				// M = set starting point (X, Y)
-				// V = draw vertical line to X
-				// H = draw horizontal line to X
-
-				// start off by setting the "Pen" to: Week of the Current Year + 1 (So its one more than when the actual week is)
-				// Draw a vertical line to the day of the start of the month
-				// Draw a horizontal line until we hit the previous month
-				// Draw a vertical line to the bottom to finish off
-
-				// if the day of the start of the month is 0, we only need to draw a straight line to the bottom
-				// we are doing `+ i / 100` to account in for the gaps between the cubes
-				if (dayOfTheWeek == 0) {
-					return `M${(weekOfYear) * ((self.cubeSize + (i / 60)) * self.scale)},0 V${days * ((self.cubeSize + (i / 60)) * self.scale)}`;
-				} else {
-					return `M${(weekOfYear + 1) * ((self.cubeSize + (i / 60)) * self.scale)},0 V${dayOfTheWeek * ((self.cubeSize + (i / 60)) * self.scale)} H${weekOfYear * ((self.cubeSize + (i / 60)) * self.scale)} V${days * (self.cubeSize * self.scale)}`;
-				}
-			});*/
+		if (this.showMonth) {
+			// add the month labels
+			svg.selectAll()
+				.data(d3.utcMonths(new Date(data[0].year, 0, 0), new Date(data[0].year, 12, 0)))
+				.enter()
+				.append("text")
+				.attr("x", function (d, i) {
+					// timeWeek.count(d3.utcYear(d), timeWeek.ceil(d))
+					// d3.utcMonday.count(d3.utcYear(d), d3.utcMonday.ceil(d))
+					const date = new Date(d);
+					
+					// d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth())
+					const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
+					return pos * (25 * self.scale);
+				})
+				.attr("y", -5)
+				.text(formatMonth);
+		}
 	}
 
 	getColor(minValue, maxValue, value) {
@@ -542,16 +565,16 @@ class HeatmapGenerator {
 			default:
 			case 1: // linear color scale
 				colors = d3.scaleLinear()
-					.range([this.baseColor, this.fadeColor])
+					.range([this.minColor, this.maxColor])
 					.domain([minValue, maxValue]);
 				break;
 			case 2: // sqrt color scale
 				colors = d3.scaleSqrt()
-					.range([this.baseColor, this.fadeColor])
+					.range([this.minColor, this.maxColor])
 					.domain([0, maxValue]);
 				break;
 			case 3: // cubehelix color scale
-				colors = d3.scaleSequential(d3.interpolateCubehelix(this.baseColor, this.fadeColor))
+				colors = d3.scaleSequential(d3.interpolateCubehelix(this.minColor, this.maxColor))
 					.domain([minValue, maxValue]);
 				break;
 		}
@@ -560,154 +583,10 @@ class HeatmapGenerator {
 	}
 }
 
-const weeklyData = createWeeklyData(data.nodegroups.kz);
-const yearlyData = createYearlyData(data.byday.kz);
-const monthlyData = createMonthlyData(data.nodegroups.kz);
-// generate the svg
-const heatmap = new HeatmapGenerator({ locale: "de-DE" });
-heatmap.yearly("graphcontainer", yearlyData);
-// heatmap.monthly("graphcontainer", monthlyData);
-// heatmap.weekly("graphcontainer", weeklyData);
-
-function createYearlyData(data) {
-	// split the date (e.g. "190228") and return single elements (day, month, year) instead
-	function parseDateByHour(el) {
-		const date = el.match(/.{2}/g);
-	
-		const year = date[0];
-		const month = date[1];
-		const day = date[2];
-		
-		return [day, month, year];
-	};
-	
-	// create new array
-	let newHeatMapData = [];
-	let lowestValue = Number.MAX_SAFE_INTEGER;
-	let highestValue = 0;
-	
-	const keys = Object.keys(data);
-	for (let i = 0; i < keys.length; i++) {
-		const date = parseDateByHour(keys[i]);
-
-		const jsDate = new Date("20" + date[2], date[1], date[0]);
-
-		const ms = jsDate.getTime();
-		const value = data[keys[i]];
-
-		newHeatMapData.push({
-			date: ms,
-			day: jsDate.getDate(),
-			month: jsDate.getMonth(),
-			year: jsDate.getFullYear(),
-			value: value,
-		});
-
-		/*if (ms < lowestDate) {
-			lowestDate = ms;
-		} else if (ms > highestDate) {
-			highestDate = ms;
-		}*/
-
-		if (value < lowestValue) {
-			lowestValue = value;
-		} else if (value > highestValue) {
-			highestValue = value;
-		}
-	}
-
-	return {data: newHeatMapData, minPossible: lowestValue, maxPossible: highestValue};
-	// return [newHeatMapData, lowestDate, highestDate, lowestValue, highestValue];
-}
-
-function createWeeklyData(data) {
-	// split the date (e.g. "19022810") and return single elements (hour, day, month, year) instead
-	function parseDateByHour(el) {
-		const date = el.match(/.{2}/g);
-	
-		const year = date[0];
-		const month = date[1];
-		const day = date[2];
-		const hour = date[3];
-		
-		return [hour, day, month, year];
-	};
-	
-	// create new array
-	let newHeatMapData = [];
-	let lowestVal = Number.MAX_SAFE_INTEGER;
-	let highestVal = 0;
-
-	
-	const keys = Object.keys(data);
-	for (let i = 0; i < keys.length; i++) {
-		const date = parseDateByHour(keys[i]);
-		const val = data[keys[i]];
-
-		const jsDate = new Date("20" + date[3], date[2] - 1, date[1], date[0]);
-		const startOfYear = new Date(jsDate.getFullYear(), 0, 1);
-		const weekInYear = Math.ceil( (((jsDate - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7 );
-
-		const day = jsDate.getUTCDay();
-
-		newHeatMapData.push({
-			week: parseFloat(weekInYear), // week of the year - range: 0-53
-			day: parseFloat(day), // range: 0-6
-			hour: parseFloat(date[0]), // range: 0 - 23
-			year: parseFloat(date[3]), // e.g. 2017
-			value: val // e.g. 5
-		});
-
-		if (val > highestVal) {
-			highestVal = val;
-		}
-
-		if (val < lowestVal) {
-			lowestVal = val;
-		}
-	}
-
-	return {data: newHeatMapData, minPossible: lowestVal, maxPossible: highestVal};
-}
-
-function createMonthlyData(data) {
-	// split the date (e.g. "19022810") and return single elements (hour, day, month, year) instead
-	function parseDateByHour(el) {
-		const date = el.match(/.{2}/g);
-	
-		const year = date[0];
-		const month = date[1];
-		const day = date[2];
-		const hour = date[3];
-		
-		return [hour, day, month, year];
-	};
-	
-	// create new array
-	let newHeatMapData = {data: [], maxPossible: 0, minPossible: Number.MAX_SAFE_INTEGER};
-
-	const keys = Object.keys(data);
-	for (let i = 0; i < keys.length; i++) {
-		const date = parseDateByHour(keys[i]);
-		
-		const val = data[keys[i]];
-		
-		newHeatMapData.data.push({
-			month: parseFloat(date[2]) - 1,
-			day: parseFloat(date[1]) - 1,
-			hour: parseFloat(date[0]),
-			year: parseFloat("20" + date[3]),
-			value: parseFloat(val),
-		});
-
-		if (val > newHeatMapData.maxPossible) {
-			newHeatMapData.maxPossible = val;
-		}
-
-		if (val < newHeatMapData.minPossible) {
-			newHeatMapData.minPossible = val;
-		}
-	}
-
-	return newHeatMapData;
-}
+/**
+ * A song
+ * @typedef {Object} YearlyData
+ * @property {string} title - The title
+ * @property {string} artist - The artist
+ * @property {number} year - The year
+ */

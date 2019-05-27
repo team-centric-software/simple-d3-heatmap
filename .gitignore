@@ -1,1 +1,5 @@
 wip/
+node_modules/
+package.json
+package-lock.json
+d3.js
