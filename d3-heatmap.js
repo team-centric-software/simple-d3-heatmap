@@ -64,10 +64,10 @@ class HeatmapGenerator {
 	}
 
 	/**
-	 * Creates a Heatmap of atleast one Week (multiple possible)
+	 * Creates a weekly heatmap
 	 *
 	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
-	 * @param {Object} data
+	 * @param {heatmapData} data
 	 * @memberof HeatmapGenerator
 	 */
 	weekly(container_id, data) {
@@ -216,10 +216,10 @@ class HeatmapGenerator {
 	}
 	
 	/**
-	 * Creates a Heatmap of atleast one Month (multiple possible)
+	 * Creates a monthly heatmap
 	 *
 	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
-	 * @param {Object} data
+	 * @param {heatmapData} data
 	 * @memberof HeatmapGenerator
 	 */
 	monthly(container_id, data) {
@@ -426,10 +426,10 @@ class HeatmapGenerator {
 	}
 
 	/**
-	 * Creates a Heatmap of one Year
+	 * Creates a yearly heatmap
 	 *
 	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
-	 * @param {YearlyData} data
+	 * @param {heatmapData} data
 	 * @memberof HeatmapGenerator
 	 */
 	yearly(container_id, data) {
@@ -611,11 +611,3 @@ class HeatmapGenerator {
 		return colors(value);
 	}
 }
-
-/**
- * A song
- * @typedef {Object} YearlyData
- * @property {string} title - The title
- * @property {string} artist - The artist
- * @property {number} year - The year
- */
