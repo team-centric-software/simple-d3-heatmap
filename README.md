@@ -23,6 +23,14 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 ```html
 <div id="calendarContainer"></div>
 <script>
+	const data = {
+		1553986800000: 0,
+		1554069600000: 3,
+		1554156000000: 5,
+		1554242400000: 19,
+		...
+	};
+
 	const heatmap = new HeatmapGenerator();
 	heatmap.weekly("calendarContainer", data);
 </script>
