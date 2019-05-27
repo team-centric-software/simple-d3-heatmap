@@ -90,7 +90,7 @@ class HeatmapGenerator {
 			const weekInYear = Math.ceil( (((date - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7 );
 
 			data2.push({
-				day: date.getUTCDay(),
+				day: date.getUTCDay() - 1,
 				hour: date.getUTCHours(),
 				week: weekInYear,
 				year: date.getUTCFullYear(),
@@ -118,9 +118,8 @@ class HeatmapGenerator {
 			const day = new Date(2019, 0, i);
 			days.push(day.toLocaleString(this.locale, {weekday: this.dayNameLength}));
 		}
-		days.reverse();
 
-		// go through all days in the month
+		// go through all days in the week
 		for (let i = 0; i < 7; i++) {
 			// go through all 24 hours
 			for (let j = 0; j < 24; j++) {
@@ -171,7 +170,8 @@ class HeatmapGenerator {
 		});
 		// Format the Ticks of the yAxis (Dates)
 		const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
-			return `${d}`;
+			days.reverse();
+			return `${days[i]}`;
 		});
 
 		// render the xAxis (Hours)
