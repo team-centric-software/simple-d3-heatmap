@@ -49,7 +49,7 @@ const heatmap = new HeatmapGenerator({
 
 #### HeatmapGenerator.weekly(container_id, data) 
 
-Creates a Heatmap of atleast one Week (multiple possible)
+Creates a heatmap calendar of one week
 
 ##### Parameters
 
@@ -65,7 +65,7 @@ Creates a Heatmap of atleast one Week (multiple possible)
 
 #### HeatmapGenerator.monthly(container_id, data) 
 
-Creates a Heatmap of atleast one Month (multiple possible)
+Creates a heatmap calendar of one month
 
 ##### Parameters
 
@@ -81,7 +81,7 @@ Creates a Heatmap of atleast one Month (multiple possible)
 
 #### HeatmapGenerator.yearly(container_id, data) 
 
-Creates a Heatmap of one Year
+Creates a heatmap calendar of one year
 
 ##### Parameters
 
