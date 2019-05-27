@@ -52,13 +52,13 @@ class HeatmapGenerator {
 		this.showLines = settings.showLines || false;
 		this.showTicks = settings.showTicks || true;
 		this.locale = settings.locale || "en-US";
-		this.dayNameLength = settings.dayNameLength || "long";
+		this.dayNameLength = settings.dayNameLength || "short";
 		this.showMonth = settings.showMonth || true;
 
 		// create tooltip
 		d3.select("body").append("div")
+			.attr("style", "font-family: 'Tahoma'; position: absolute;")
 			.attr("class", "tooltip")
-			.style("position", "absolute")
 			.attr("id", "tooltipDiv")
 			.style("display", "none");
 	}
@@ -354,7 +354,7 @@ class HeatmapGenerator {
 			// render the month and date at the top of the heatmap
 			svg.append("text")
 				.text(date.toLocaleString(this.locale, { month: "long" }) + " - " + data[0].year)
-				.attr("style", "font-weight: 700; font-size: 18;")
+				.attr("style", "font-weight: 700; font-size: 18px; font-family: 'Tahoma';")
 				.attr("x", -45)
 				.attr("y", -45);
 		}
@@ -472,6 +472,7 @@ class HeatmapGenerator {
 			.selectAll("text")
 			.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
 			.join("text")
+			.attr("style", "font-family: 'Tahoma';")
 			.attr("x", -5)
 			.attr("y", (d, i) => { return (d + 0.5) * (25 * this.scale) + (i * this.gutterSize); })
 			.attr("dy", "0.31em") // give it a little y space from top
@@ -528,6 +529,7 @@ class HeatmapGenerator {
 				.data(d3.utcMonths(new Date(data[0].year, data[0].month + 1, -1), new Date(data[data.length - 1].year, data[data.length - 1].month + 1, 32)))
 				.enter()
 				.append("text")
+				.attr("style", "font-family: 'Tahoma';")
 				.attr("x", function (d, i) {
 					// timeWeek.count(d3.utcYear(d), timeWeek.ceil(d))
 					// d3.utcMonday.count(d3.utcYear(d), d3.utcMonday.ceil(d))
