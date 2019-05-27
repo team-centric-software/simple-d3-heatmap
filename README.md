@@ -38,11 +38,11 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 <div id="calendarContainer"></div>
 <script>
 	const data = {
-		1553986800000: 0,
-		1554069600000: 3,
-		1554156000000: 5,
-		1554242400000: 19,
-		...
+		1546254000000: 29,
+		1546257600000: 41,
+		1546261200000: 50,
+		1546264800000: 13,
+		1546268400000: 5,
 	};
 
 	const heatmap = new HeatmapGenerator();
