@@ -4,8 +4,8 @@
  */
 
 /**
- * Create an instance of HeatmapGenerator.
- * @param {Object} [settings] Object which holds all settings for the HeatmapGenerator
+ * Create an instance of SimpleD3Heatmap.
+ * @param {Object} [settings] Object which holds all settings for the SimpleD3Heatmap
  * @param {color} [settings.minColor] Color of the lowest datapoint in the heatmap - as HEX, RGB or CSS color code
  * @param {color} [settings.maxColor] Color of the highest datapoint in the heatmap - as HEX, RGB or CSS color code
  * @param {int} [settings.colorMode] Selects the way the colors are generated (1 => linear, 2 => sqrt or 3 => cubehelix)
@@ -19,7 +19,7 @@
  * @param {boolean} [settings.showMonth] Show the months?
  * 
  * @example 
- * const heatmap = new HeatmapGenerator({
+ * const heatmap = new SimpleD3Heatmap({
  *     minColor: "#ECF5E2", // lowest datapoint's color in the heatmap - e.g. rgb(0, 255, 0) or #00ff00
  *     maxColor: "#222081", // highest datapoint's color in the heatmap - e.g. rgb(255, 255, 0) or #ffff00
  *     colorMode: 2, // switches between color scales (1: linear, 2: sqrt and 3: cubehelix)
@@ -37,7 +37,7 @@
  * 
  * @class
  */
-class HeatmapGenerator {
+class SimpleD3Heatmap {
 	constructor(settings = {}) {
 		this.hours = d3.range(24);
 
@@ -68,7 +68,7 @@ class HeatmapGenerator {
 	 *
 	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
 	 * @param {heatmapData} data
-	 * @memberof HeatmapGenerator
+	 * @memberof SimpleD3Heatmap
 	 */
 	weekly(container_id, data) {
 		const self = this;
@@ -220,7 +220,7 @@ class HeatmapGenerator {
 	 *
 	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
 	 * @param {heatmapData} data
-	 * @memberof HeatmapGenerator
+	 * @memberof SimpleD3Heatmap
 	 */
 	monthly(container_id, data) {
 		const self = this;
@@ -430,7 +430,7 @@ class HeatmapGenerator {
 	 *
 	 * @param {String} container_id ID of the Container where the Heatmap should be appended to
 	 * @param {heatmapData} data
-	 * @memberof HeatmapGenerator
+	 * @memberof SimpleD3Heatmap
 	 */
 	yearly(container_id, data) {
 		const self = this;

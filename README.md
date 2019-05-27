@@ -45,7 +45,7 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 		1546268400000: 5,
 	};
 
-	const heatmap = new HeatmapGenerator();
+	const heatmap = new SimpleD3Heatmap();
 	heatmap.weekly("calendarContainer", data);
 </script>
 ```
@@ -53,15 +53,15 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 Documentation
 -----------------
 
-#### new HeatmapGenerator([settings]) 
+#### new SimpleD3Heatmap([settings]) 
 
-Creates an instance of HeatmapGenerator.
+Creates an instance of SimpleD3Heatmap.
 
 ##### Parameters
 
 | Name | Type | Description | default | |
 | ---- | ---- | ----------- | ------- | -------- |
-| settings | `Object` | Object which holds all settings for the HeatmapGenerator | `{}` | *Optional* |
+| settings | `Object` | Object which holds all settings for the SimpleD3Heatmap | `{}` | *Optional* |
 | settings.minColor | `color` | Color of the lowest datapoint in the heatmap - as HEX, RGB or CSS color code | `"#ECF5E2"` | *Optional* |
 | settings.maxColor | `color` | Color of the highest datapoint in the heatmap - as HEX, RGB or CSS color code | `"#222081"` | *Optional* |
 | settings.colorMode | `int` | Selects the way the colors are generated (1 => linear, 2 => sqrt or 3 => cubehelix) | `2` | *Optional* |
@@ -77,7 +77,7 @@ Creates an instance of HeatmapGenerator.
 ##### Example
 
 ```javascript
-const heatmap = new HeatmapGenerator({
+const heatmap = new SimpleD3Heatmap({
 	minColor: "#ECF5E2", // lowest datapoint's color in the heatmap - e.g. rgb(0, 255, 0) or #00ff00
 	maxColor: "#222081", // highest datapoint's color in the heatmap - e.g. rgb(255, 255, 0) or #ffff00
 	colorMode: 2, // switches between color scales (1: linear, 2: sqrt and 3: cubehelix)
@@ -99,7 +99,7 @@ const heatmap = new HeatmapGenerator({
 
 
 
-#### HeatmapGenerator.weekly(container_id, data) 
+#### SimpleD3Heatmap.weekly(container_id, data) 
 
 Creates a heatmap calendar of one week
 
@@ -115,7 +115,7 @@ Creates a heatmap calendar of one week
 
 
 
-#### HeatmapGenerator.monthly(container_id, data) 
+#### SimpleD3Heatmap.monthly(container_id, data) 
 
 Creates a heatmap calendar of one month
 
@@ -131,7 +131,7 @@ Creates a heatmap calendar of one month
 
 
 
-#### HeatmapGenerator.yearly(container_id, data) 
+#### SimpleD3Heatmap.yearly(container_id, data) 
 
 Creates a heatmap calendar of one year
 
