@@ -56,26 +56,7 @@ Creates a Heatmap of atleast one Week (multiple possible)
 | Name | Type | Description | |
 | ---- | ---- | ----------- | -------- |
 | container_id | `String` | ID of the container where the heatmap should be appended to | &nbsp; |
-| data | `weeklyData` | Data for the heatmap | &nbsp; |
-
-##### Data Format: weeklyData
-
-```js
-{
-	data: [
-		{
-			week: int, // week of the year - range: 0-53
-			day: int, // day of the week: range: 0-6
-			hour: int, // hour of the day - range: 0 - 23
-			year: int, // e.g. 2017
-			value: int // e.g. 5
-		},
-		...
-	],
-	minPossible: int, // smallest possible value in data
-	maxPossible: int, // highest possible value in data
-}
-```
+| data | `heatmapData` | Data for the heatmap | &nbsp; |
 
 ##### Returns
 - `Void`
@@ -91,26 +72,7 @@ Creates a Heatmap of atleast one Month (multiple possible)
 | Name | Type | Description | |
 | ---- | ---- | ----------- | -------- |
 | container_id | `String` | ID of the container where the heatmap should be appended to | &nbsp; |
-| data | `monthlyData` | Data for the heatmap | &nbsp; |
-
-##### Data Format: monthlyData
-
-```js
-{
-    data: [
-        {
-            month: int, // month of the year - range: 0 - 11
-            day: int, // day of the month - range: 0 - (28, 30, 31)
-            hour: int, // hour of the day - range: 0 - 23
-            year: int, // e.g. 2017
-            value: int // e.g. 5
-        },
-        ...
-    ],
-	minPossible: int, // smallest possible value in data
-	maxPossible: int, // highest possible value in data
-}
-```
+| data | `heatmapData` | Data for the heatmap | &nbsp; |
 
 ##### Returns
 - `Void`
@@ -126,25 +88,17 @@ Creates a Heatmap of one Year
 | Name | Type | Description | |
 | ---- | ---- | ----------- | -------- |
 | container_id | `String` | ID of the container where the heatmap should be appended to | &nbsp; |
-| data | `yearlyData` | Data for the heatmap | &nbsp; |
-
-##### Data Format: yearlyData
-
-```js
-{
-	data: [
-		{
-			month: int, // month of the year - range: 0 - 11
-			day: int, // day of the month - range: 0 - (28, 30, 31)
-			year: int, // e.g. 2017
-			value: int // e.g. 5
-		},
-		...
-	],
-	minPossible: int, // smallest possible value in data
-	maxPossible: int, // highest possible value in data
-}
-```
+| data | `heatmapData` | Data for the heatmap | &nbsp; |
 
 ##### Returns
 - `Void`
+
+
+#### Data Format: heatmapData
+
+```js
+{
+	timestamp: value,
+	...
+}
+```

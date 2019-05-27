@@ -31,7 +31,7 @@
  *     showLines: false, // show the axis line
  *     showTicks: true, // show the axis ticks
  *     locale: "de-DE", // defines the format of the date in the axis
- *     dayNameLength: "short", // style of the displayed weekday, options => long: "Friday", short: "Fri", narrow: "F" (uses locale)
+ *     dayNameLength: "long", // style of the displayed weekday, options => long: "Friday", short: "Fri", narrow: "F" (uses locale)
  *     showMonth: true, // displays the months (uses locale)
  * })
  * 
@@ -73,136 +73,145 @@ class HeatmapGenerator {
 	weekly(container_id, data) {
 		const self = this;
 
-		const maxValue = data.maxPossible || Number.MAX_SAFE_INTEGER;
-		const minValue = data.minPossible || 0;
-		data = data.data || [];
-
 		const tooltipDiv = d3.select("#tooltipDiv");
+		
+		const margin = { left: 75, right: 25, top: 25, bottom: 10 };
+		const width = (715 * this.scale) - (margin.left + margin.right);
+		let height = (225 * this.scale) - (margin.top + margin.bottom);
 
-		// get all the unique weeks in dataset
-		const weeks = [...new Set(data.map(el => el.week))];
+		const maxValue = Math.max(...Object.values(data));
+		const minValue = Math.min(...Object.values(data));
 
-		for (let w = 0; w < weeks.length; w++) {
-			const week = weeks[w];
+		// Re-format our data => convert our ts to date/year/hour
+		let data2 = [];
+		d3.keys(data).map((d) => {
+			const date = new Date(parseInt(d, 10));
+			const startOfYear = new Date(date.getFullYear(), 0, 1);
+			const weekInYear = Math.ceil( (((date - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7 );
 
-			const weekData = data.filter(el => el.week === week);
+			data2.push({
+				day: date.getUTCDay(),
+				hour: date.getUTCHours(),
+				week: weekInYear,
+				year: date.getUTCFullYear(),
+				value: parseFloat(data[d])
+			});
+		});
+		data = data2;
+
+		const week = data[0].week;
+
+		// create our base - the svg
+		const svg = d3.select(`#${container_id}`)
+			.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.on("mouseout", function(d) {
+				tooltipDiv.style("display", "none")
+			});
+
+		// create localized weekdays (mo - fr)
+		let days = [];
+		for (let i = 0; i < 7; i++) {
+			const day = new Date(2019, 0, i);
+			days.push(day.toLocaleString(this.locale, {weekday: this.dayNameLength}));
+		}
+		days.reverse();
+
+		// go through all days in the month
+		for (let i = 0; i < 7; i++) {
+			// go through all 24 hours
+			for (let j = 0; j < 24; j++) {
+				// check if data for this time exists
+				const item = data.find(el => el.day === i && el.hour === j);
+				// if data does not exist, create a new object with specified day and hour and no value
+				if (!item) {
+					data.push({
+						day: parseFloat(i), // range: 0-6
+						week: parseFloat(week), // week of the year - range: 0-53
+						hour: parseFloat(j), // range: 0 - 23
+						year: parseFloat(data[0].year), // e.g. 2017
+						value: 0 // e.g. 5
+					});
+				}
+			}
+		}
+
+		data.sort((a, b) => {
+			return a.day - b.day;
+		}).sort((a, b) => {
+			if (b.hour < a.day) {
+				return 1;
+			}
+			if (a.hour < b.hour) {
+				return -1;
+			}
+			return 0;
+		});
+
+		// Create a new ScaleBand for the X Axis
+		const x = d3.scaleBand()
+			.range([0, width])
+			.paddingInner(this.gutterSize)
+			.paddingOuter(this.outerSize)
+			.domain(this.hours);
+
+		// Create a new ScaleBand for the Y Axis
+		const y = d3.scaleBand()
+			.range([height, 0])
+			.paddingInner(this.gutterSize)
+			.paddingOuter(this.outerSize)
+			.domain(days);
+
+		// Format the Ticks of the xAxis (Hour)
+		const xAxis = d3.axisTop(x).tickFormat((d, i) => {
+			return d % 2 === 0 ? i + "h" : "";
+		});
+		// Format the Ticks of the yAxis (Dates)
+		const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
+			return `${d}`;
+		});
+
+		// render the xAxis (Hours)
+		svg.append("g")
+			.attr("class", "timeLine")
+			.call(xAxis);
+		
+		// render the yAxis (Dates)
+		svg.append("g")
+			.attr("class", "dateLine")
+			.call(yAxis);
+
+		// add square to heatmap
+		svg.selectAll()
+			.data(data)
+			.enter()
+			.append("rect")
+			.attr("x", function(d) { return x(d.hour) })
+			.attr("y", function(d) { return y(days[d.day]) })
+			.attr("width", x.bandwidth() )
+			.attr("height", y.bandwidth() )
+			.attr("style", function (d, i) {
+				return `animation: testAnim 0.25s ease-out ${0.00275 * i}s; animation-fill-mode: backwards;`;
+			})
+			.style("fill", function(d) { return self.getColor(minValue, maxValue, d.value)} )
+			.on("mouseover", function(d) {
+				tooltipDiv.style("display", "block");
+				tooltipDiv.html(d.value)
+					.style("left", `${d3.event.pageX - 17.5}px`)
+					.style("top", `${d3.event.pageY - 45}px`);
+			});
+
+		if (!this.showLines) {
+			svg.selectAll("path")
+				.style("opacity", 0);
+			}
 			
-			const margin = { left: 75, right: 25, top: 25, bottom: 10 };
-			const width = (715 * this.scale) - (margin.left + margin.right);
-			let height = (225 * this.scale) - (margin.top + margin.bottom);
-
-			// create our base - the svg
-			const svg = d3.select(`#${container_id}`)
-				.append("svg")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-				.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-				.on("mouseout", function(d) {
-					tooltipDiv.style("display", "none")
-				});
-	
-			// create localized weekdays (mo - fr)
-			let days = [];
-			for (let i = 0; i < 7; i++) {
-				const day = new Date(2019, 0, i);
-				days.push(day.toLocaleString(this.locale, {weekday: this.dayNameLength}));
-			}
-			days.reverse();
-
-			// go through all days in the month
-			for (let i = 0; i < 7; i++) {
-				// go through all 24 hours
-				for (let j = 0; j < 24; j++) {
-					// check if data for this time exists
-					const item = weekData.find(el => el.day === i && el.hour === j);
-					// if data does not exist, create a new object with specified day and hour and no value
-					if (!item) {
-						weekData.push({
-							week: parseFloat(week), // week of the year - range: 0-53
-							day: parseFloat(i), // range: 0-6
-							hour: parseFloat(j), // range: 0 - 23
-							year: parseFloat(weekData[0].year), // e.g. 2017
-							value: 0 // e.g. 5
-						});
-					}
-				}
-			}
-
-			weekData.sort((a, b) => {
-				return a.day - b.day;
-			}).sort((a, b) => {
-				if (b.hour < a.day) {
-					return 1;
-				}
-				if (a.hour < b.hour) {
-					return -1;
-				}
-				return 0;
-			});
-	
-			// Create a new ScaleBand for the X Axis
-			const x = d3.scaleBand()
-				.range([0, width])
-				.paddingInner(this.gutterSize)
-				.paddingOuter(this.outerSize)
-				.domain(this.hours);
-	
-			// Create a new ScaleBand for the Y Axis
-			const y = d3.scaleBand()
-				.range([height, 0])
-				.paddingInner(this.gutterSize)
-				.paddingOuter(this.outerSize)
-				.domain(days);
-	
-			// Format the Ticks of the xAxis (Hour)
-			const xAxis = d3.axisTop(x).tickFormat((d, i) => {
-				return d % 2 === 0 ? i + "h" : "";
-			});
-			// Format the Ticks of the yAxis (Dates)
-			const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
-				return `${d}`;
-			});
-	
-			// render the xAxis (Hours)
-			svg.append("g")
-				.attr("class", "timeLine")
-				.call(xAxis);
-			
-			// render the yAxis (Dates)
-			svg.append("g")
-				.attr("class", "dateLine")
-				.call(yAxis);
-
-			// add square to heatmap
-			svg.selectAll()
-				.data(weekData)
-				.enter()
-				.append("rect")
-				.attr("x", function(d) { return x(d.hour) })
-				.attr("y", function(d) { return y(days[d.day]) })
-				.attr("width", x.bandwidth() )
-				.attr("height", y.bandwidth() )
-				.attr("style", function (d, i) {
-					return `animation: testAnim 0.25s ease-out ${0.00275 * i}s; animation-fill-mode: backwards;`;
-				})
-				.style("fill", function(d) { return self.getColor(minValue, maxValue, d.value)} )
-				.on("mouseover", function(d) {
-					tooltipDiv.style("display", "block");
-					tooltipDiv.html(d.value)
-						.style("left", `${d3.event.pageX - 17.5}px`)
-						.style("top", `${d3.event.pageY - 45}px`);
-				});
-
-			if (!this.showLines) {
-				svg.selectAll("path")
-					.style("opacity", 0);
-				}
-				
-			if (!this.showTicks) {
-				svg.selectAll("line")
-					.style("opacity", 0);
-			}
+		if (!this.showTicks) {
+			svg.selectAll("line")
+				.style("opacity", 0);
 		}
 	}
 	
@@ -216,200 +225,204 @@ class HeatmapGenerator {
 	monthly(container_id, data) {
 		const self = this;
 
-		const maxValue = data.maxPossible || Number.MAX_SAFE_INTEGER;
-		const minValue = data.minPossible || 0;
-		data = data.data || [];
-
 		const tooltipDiv = d3.select("#tooltipDiv");
 
-		// get all the unique months in dataset
-		const months = [...new Set(data.map(el => el.month))];
-		
-		// iterate over all available unique months
-		for (let m = 0; m < months.length; m++) {
-			const currMonth = months[m];
+		const maxValue = Math.max(...Object.values(data));
+		const minValue = Math.min(...Object.values(data));
 
-			// get all the data that is related to our current month
-			const monthData = data.filter(el => el.month === currMonth);
+		// Re-format our data => convert our ts to date/month/year/hour
+		let data2 = [];
+		d3.keys(data).map((d) => {
+			const date = new Date(parseInt(d, 10));
+			data2.push({
+				day: date.getUTCDate() - 1,
+				hour: date.getUTCHours(),
+				month: date.getUTCMonth(),
+				year: date.getUTCFullYear(),
+				value: parseFloat(data[d])
+			});
+		});
+		data = data2;
 
-			// create a date object from our current month and year
-			const date = new Date(monthData[0].year, currMonth + 1, 0);
+		console.log(data);
 
-			// get the amount of days available in this month
-			const daysInMonth = date.getDate();
+		// create a date object from our current month and year
+		const date = new Date(data[0].year, data[0].month + 1, 0);
 
-			// go through all days in the month
-			for (let i = 0; i < daysInMonth; i++) {
-				// go through all 24 hours
-				for (let j = 0; j < 24; j++) {
-					// check if data for this time exists
-					const item = monthData.find(el => el.day === i && el.hour === j);
-					// if data does not exist, create a new object with specified day and hour and no value
-					if (!item) {
-						monthData.push({
-							day: i,
-							hour: j,
-							year: monthData[0].year,
-							month: monthData[0].month,
-							value: 0,
-						});
-					}
+		// get the amount of days available in this month
+		const daysInMonth = date.getDate();
+
+		// go through all days in the month
+		for (let i = 0; i < daysInMonth; i++) {
+			// go through all 24 hours
+			for (let j = 0; j < 24; j++) {
+				// check if data for this time exists
+				const item = data.find(el => el.day === i && el.hour === j);
+				// if data does not exist, create a new object with specified day and hour and no value
+				if (!item) {
+					data.push({
+						day: i,
+						hour: j,
+						month: data[0].month,
+						year: data[0].year,
+						value: 0,
+					});
 				}
 			}
-
-			// sort our data (needed for animation)
-			monthData.sort((a, b) => {
-				return a.day - b.day;
-			}).sort((a, b) => {
-				if (b.hour < a.day) {
-					return 1;
-				}
-				if (a.hour < b.hour) {
-					return -1;
-				}
-				return 0;
-			});
-
-			// create array with all available days in current month - we need to reverse it for d3 so we start from the bottom
-			const days = d3.range(daysInMonth).reverse();
-
-			// set our margin's, width and height
-			const margin = { left: 100, right: 25, top: this.showMonth ? 75 : 25, bottom: 25 };
-			const width = (692 * this.scale) - (margin.left + margin.right);
-			let height = ((26 * daysInMonth) * this.scale) - (margin.top + margin.bottom);
-			this.showMonth ? "" : height -= 50; // remove 50px which were needed for the "Month - Year" text
-			
-			const paddingBottom = (height + margin.top + margin.bottom) - (806 * this.scale);
-
-			// create our base - the svg
-			const svg = d3.select(`#${container_id}`)
-				.append("div")
-				.attr("style", "display: inline-block;")
-				.append("svg")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom - paddingBottom)
-				.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-				.on("mouseout", function(d) {
-					tooltipDiv.style("display", "none")
-				});
-
-			// Create a new ScaleBand for the X Axis
-			const x = d3.scaleBand()
-				.range([0, width])
-				.paddingInner(this.gutterSize)
-				.paddingOuter(this.outerSize)
-				.domain(this.hours);
-
-			// Create a new ScaleBand for the Y Axis
-			const y = d3.scaleBand()
-				.range([height, 0])
-				.paddingInner(this.gutterSize)
-				.paddingOuter(this.outerSize)
-				.domain(days);
-
-			// Format the Ticks of the xAxis (Hour)
-			const xAxis = d3.axisTop(x).tickFormat((d, i) => {
-				return d % 2 === 0 ? i + "h" : "";
-			});
-			// Format the Ticks of the yAxis (Dates)
-			const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
-				const date = new Date(monthData[0].year, currMonth, d + 1);
-				const dayMonth = date.toLocaleString(this.locale, {
-					month: "2-digit",
-					day: "2-digit",
-				});
-				const dayName = date.toLocaleString(this.locale, {
-					weekday: this.dayNameLength,
-				});
-				// .text(date.toLocaleString(settings.locale, { month: "long" }) + " - " + data[0].year)
-				return `${dayMonth}, ${dayName}`;
-			});
-
-			// render the xAxis (Hours)
-			svg.append("g")
-				.attr("class", "timeLine")
-				.call(xAxis);
-			
-			// render the yAxis (Dates)
-			svg.append("g")
-				.attr("class", "dateLine")
-				.call(yAxis);
-
-			if (this.showMonth) {
-				// render the month and date at the top of the heatmap
-				svg.append("text")
-					.text(date.toLocaleString(this.locale, { month: "long" }) + " - " + monthData[0].year)
-					.attr("style", "font-weight: 700; font-size: 18;")
-					.attr("x", -45)
-					.attr("y", -45);
-			}
-
-			// add square to heatmap
-			svg.selectAll()
-				.data(monthData)
-				.enter()
-				.append("rect")
-				.attr("x", function(d) { return x(d.hour) })
-				.attr("y", function(d) { return y(d.day) })
-				.attr("width", x.bandwidth() )
-				.attr("height", y.bandwidth() )
-				.attr("style", function (d, i) {
-					let style = `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
-					return style;
-				})
-				.style("fill", function(d) {
-					return self.getColor(minValue, maxValue, d.value);
-				})
-				.on("mouseover", function(d) {
-					tooltipDiv.style("display", "block");
-					tooltipDiv.html(d.value)
-						.style("left", `${d3.event.pageX - 17.5}px`)
-						.style("top", `${d3.event.pageY - 45}px`);
-				});
-				
-
-			if (!this.showLines) {
-				svg.selectAll("path")
-					.style("opacity", 0);
-				}
-				
-			if (!this.showTicks) {
-				svg.selectAll("line")
-					.style("opacity", 0);
-			}
-
-			const sundays = Array.from(new Set(monthData.map(el => el.day))).map(day => {
-				const item = monthData.find(el => el.day === day);
-				const date = new Date(item.year, item.month, day).getDay();
-				const isSunday = date == 6 ? true : false;
-				if (isSunday) {
-					return {
-						day: day,
-						month: item.month,
-						year: item.year
-					}
-				} else {
-					return {}
-				}
-			}).filter((item) => {
-				return item.day;
-			});
-
-			const spacing = height / daysInMonth;
-			svg.selectAll()
-				.data(sundays)
-				.enter()
-				.append("path")
-				.attr("style", "opacity: 1;")
-				.attr("stroke", "rgba(0,0,0,0.15)")
-				.attr("stroke-width", `${3 * this.scale}px`)
-				.attr("d", (d, i) => {
-					const height = ((spacing - (0.115 * self.scale) * (i + 1)) * (d.day + 1)) + (7 * self.scale);
-					// console.log(d.day, spacing);
-					return `M${8 * self.scale},${height} L${width - (8 * self.scale)},${height}`;
-				});
 		}
+
+		// sort our data (needed for animation)
+		data.sort((a, b) => {
+			return a.day - b.day;
+		}).sort((a, b) => {
+			if (b.hour < a.day) {
+				return 1;
+			}
+			if (a.hour < b.hour) {
+				return -1;
+			}
+			return 0;
+		});
+
+		// create array with all available days in current month - we need to reverse it for d3 so we start from the bottom
+		const days = d3.range(daysInMonth).reverse();
+
+		// set our margin's, width and height
+		const margin = { left: 100, right: 25, top: this.showMonth ? 75 : 25, bottom: 25 };
+		const width = (692 * this.scale) - (margin.left + margin.right);
+		let height = ((26 * daysInMonth) * this.scale) - (margin.top + margin.bottom);
+		this.showMonth ? "" : height -= 50; // remove 50px which were needed for the "Month - Year" text
+		
+		const paddingBottom = (height + margin.top + margin.bottom) - (806 * this.scale);
+
+		// create our base - the svg
+		const svg = d3.select(`#${container_id}`)
+			.append("div")
+			.attr("style", "display: inline-block;")
+			.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom - paddingBottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.on("mouseout", function(d) {
+				tooltipDiv.style("display", "none")
+			});
+
+		// Create a new ScaleBand for the X Axis
+		const x = d3.scaleBand()
+			.range([0, width])
+			.paddingInner(this.gutterSize)
+			.paddingOuter(this.outerSize)
+			.domain(this.hours);
+
+		// Create a new ScaleBand for the Y Axis
+		const y = d3.scaleBand()
+			.range([height, 0])
+			.paddingInner(this.gutterSize)
+			.paddingOuter(this.outerSize)
+			.domain(days);
+
+		// Format the Ticks of the xAxis (Hour)
+		const xAxis = d3.axisTop(x).tickFormat((d, i) => {
+			return d % 2 === 0 ? i + "h" : "";
+		});
+		// Format the Ticks of the yAxis (Dates)
+		const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
+			const date = new Date(data[0].year, data[0].month, d + 1);
+			const dayMonth = date.toLocaleString(this.locale, {
+				month: "2-digit",
+				day: "2-digit",
+			});
+			const dayName = date.toLocaleString(this.locale, {
+				weekday: this.dayNameLength,
+			});
+			// .text(date.toLocaleString(settings.locale, { month: "long" }) + " - " + data[0].year)
+			return `${dayMonth}, ${dayName}`;
+		});
+
+		// render the xAxis (Hours)
+		svg.append("g")
+			.attr("class", "timeLine")
+			.call(xAxis);
+		
+		// render the yAxis (Dates)
+		svg.append("g")
+			.attr("class", "dateLine")
+			.call(yAxis);
+
+		if (this.showMonth) {
+			// render the month and date at the top of the heatmap
+			svg.append("text")
+				.text(date.toLocaleString(this.locale, { month: "long" }) + " - " + data[0].year)
+				.attr("style", "font-weight: 700; font-size: 18;")
+				.attr("x", -45)
+				.attr("y", -45);
+		}
+
+		// add square to heatmap
+		svg.selectAll()
+			.data(data)
+			.enter()
+			.append("rect")
+			.attr("x", function(d) { return x(d.hour) })
+			.attr("y", function(d) { return y(d.day) })
+			.attr("width", x.bandwidth() )
+			.attr("height", y.bandwidth() )
+			.attr("style", function (d, i) {
+				let style = `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
+				return style;
+			})
+			.style("fill", function(d) {
+				return self.getColor(minValue, maxValue, d.value);
+			})
+			.on("mouseover", function(d) {
+				tooltipDiv.style("display", "block");
+				tooltipDiv.html(d.value)
+					.style("left", `${d3.event.pageX - 17.5}px`)
+					.style("top", `${d3.event.pageY - 45}px`);
+			});
+			
+
+		if (!this.showLines) {
+			svg.selectAll("path")
+				.style("opacity", 0);
+			}
+			
+		if (!this.showTicks) {
+			svg.selectAll("line")
+				.style("opacity", 0);
+		}
+
+		const sundays = Array.from(new Set(data.map(el => el.day))).map(day => {
+			const item = data.find(el => el.day === day);
+			const date = new Date(item.year, item.month, day).getDay();
+			const isSunday = date == 6 ? true : false;
+			if (isSunday) {
+				return {
+					day: day,
+					month: item.month,
+					year: item.year
+				}
+			} else {
+				return {}
+			}
+		}).filter((item) => {
+			return item.day;
+		});
+
+		const spacing = height / daysInMonth;
+		svg.selectAll()
+			.data(sundays)
+			.enter()
+			.append("path")
+			.attr("style", "opacity: 1;")
+			.attr("stroke", "rgba(0,0,0,0.15)")
+			.attr("stroke-width", `${3 * this.scale}px`)
+			.attr("d", (d, i) => {
+				const height = ((spacing - (0.115 * self.scale) * (i + 1)) * (d.day + 1)) + (7 * self.scale);
+				// console.log(d.day, spacing);
+				return `M${8 * self.scale},${height} L${width - (8 * self.scale)},${height}`;
+			});
 	}
 
 	/**
@@ -423,9 +436,8 @@ class HeatmapGenerator {
 		const self = this;
 		const tooltipDiv = d3.select("#tooltipDiv");
 
-		const maxValue = data.maxPossible || Number.MAX_SAFE_INTEGER;
-		const minValue = data.minPossible || 0;
-		data = data.data || [];
+		const maxValue = Math.max(...Object.values(data));
+		const minValue = Math.min(...Object.values(data));
 
 		// set our margin's, width and height
 		const margin = { left: 85, right: 0, top: this.showMonth ? 25 : 0, bottom: 0 };
@@ -442,7 +454,6 @@ class HeatmapGenerator {
 		// returns the given date's day as int (0 - 6)
 		const getDayOfDate = (d) => (new Date(d).getUTCDay() + 6) % 7;
 		const formatDay = d => days[d];
-		const formatMonth = d => new Date(d).toLocaleString(this.locale, { month: "long" });
 
 		// create our base - the svg
 		const svg = d3.select(`#${container_id}`)
@@ -466,82 +477,55 @@ class HeatmapGenerator {
 			.attr("dy", "0.31em") // give it a little y space from top
 			.text(formatDay);
 
-		// sort by date - needed to add missing data
+		// Re-format our data => convert our ts to date/month/year
+		let data2 = [];
+		d3.keys(data).map((d) => {
+			const date = new Date(parseInt(d, 10));
+			data2.push({ 
+				ts: date.getTime(),
+				date: date.getUTCDate(),
+				month: date.getUTCMonth(),
+				year: date.getUTCFullYear(),
+				value: parseFloat(data[d])
+			});
+		});
+		data = data2;
+
+		// sort by date
 		data.sort((a, b) => {
-			return a.date - b.date;
+			return a.ts - b.ts;
 		});
 
 		// get the oldest available date
-		const oldest = new Date(data[0].year, data[0].month, data[0].day).getTime();
+		const oldest = new Date(data[0].ts).getTime();
 
 		// go through all 365 days
 		for (let i = 0; i < 365; i++) {
 			// create date for day
 			const date = new Date(oldest + (i * 86400000));
 
-			const day = date.getUTCDate() + 1;
+			const day = date.getUTCDate();
 			const month = date.getUTCMonth();
 			const year = date.getUTCFullYear();
 
 			// try to find the index of given date
-			const itemIndex = data.findIndex(el => el.day === day && el.month === month && el.year === year);
+			const itemIndex = data.findIndex(el => el.date === day && el.month === month && el.year === year);
 			if (itemIndex === -1) {
 				// day does not exist - lets create and push it
 				data.push({
-					day: day,
+					ts: date.getTime(),
+					date: day,
 					month: month,
 					year: year,
 					value: 0,
-					date: date.getTime(),
-					filled: true,
 				});
 			}
 		}
-
-		// needed for the fancy animation
-		data.sort((a, b) => {
-			return a.month - b.month
-		});
-
-		// add the squares
-		svg.selectAll()
-			.data(data)
-			.enter()
-			.append("rect")
-			.attr("x", function (d, i) {
-				// d3.utcMonday => gets all "Monday-based" weeks
-				// d3.utcYear => gets the start of the year (e.g. Jan 01 2019)
-				const date = new Date(d.date);
-
-				// returns current week of the year * squareize
-				return (d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth()) * (25 * self.scale);
-				// return (d3.utcMonday.count(d3.utcYear(d.date), d.date) * (25 * self.scale)) + d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.gutterSize);
-			})
-			.attr("y", function (d) {
-				// returns the day of the given date of the week (0-6, monday-sunday) * squareize to set the Y position (Monday at the top, Sunday at the bottom)
-				return (getDayOfDate(d.date) * (25 * self.scale) + 0.5) + getDayOfDate(d.date) * (self.gutterSize);
-			})
-			.attr("style", function (d, i) {
-				return `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
-			})
-			.attr("width", (25 * this.scale) - (1* this.scale) )
-			.attr("height", (25 * this.scale) - (1* this.scale) )
-			.style("fill", function(d) {
-				// returns the color from the color scale
-				return self.getColor(minValue, maxValue, d.value);
-			})
-			.on("mouseover", function(d) {
-				const date = new Date(d.date);
-				tooltipDiv.style("display", "block")
-				tooltipDiv.html(`${d.value}: ${date.getUTCMonth() + 1}/${date.getUTCDate()}`)
-					.style("left", `${event.pageX - 35}px`)
-					.style("top", `${event.pageY - 40}px`);
-			});
 		
 		if (this.showMonth) {
 			// add the month labels
 			svg.selectAll()
-				.data(d3.utcMonths(new Date(data[0].year, 0, 0), new Date(data[0].year, 12, 0)))
+				.data(d3.utcMonths(new Date(data[0].year, data[0].month + 1, -1), new Date(data[data.length - 1].year, data[data.length - 1].month + 1, 32)))
 				.enter()
 				.append("text")
 				.attr("x", function (d, i) {
@@ -554,8 +538,53 @@ class HeatmapGenerator {
 					return pos * (25 * self.scale);
 				})
 				.attr("y", -5)
-				.text(formatMonth);
+				.text((d) => {
+					const date = new Date(d);
+					console.log(d);
+					return date.toLocaleString(this.locale, { month: this.dayNameLength }) + " - " + date.getUTCFullYear();
+				});
 		}
+
+		// sort by month for the fancy animation
+		data.sort((a, b) => {
+			return a.month - b.month
+		});
+
+		// add the squares
+		svg.selectAll()
+			.data(data)
+			.enter()
+			.append("rect")
+			.attr("x", function (d, i) {
+				const date = new Date(d.ts);
+				
+				// d3.utcMonday => gets all "Monday-based" weeks
+				// d3.utcYear => gets the start of the year (e.g. Jan 01 2019)
+
+				// returns current week of the year * squaresize
+				return (d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth()) * (25 * self.scale);
+				// return (d3.utcMonday.count(d3.utcYear(d.date), d.date) * (25 * self.scale)) + d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.gutterSize);
+			})
+			.attr("y", function (d) {
+				// returns the day of the given date of the week (0-6, monday-sunday) * squareize to set the Y position (Monday at the top, Sunday at the bottom)
+				return (getDayOfDate(d.ts) * (25 * self.scale) + 0.5) + getDayOfDate(d.ts) * (self.gutterSize);
+			})
+			.attr("style", function (d, i) {
+				return `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
+			})
+			.attr("width", (25 * this.scale) - (1* this.scale) )
+			.attr("height", (25 * this.scale) - (1* this.scale) )
+			.style("fill", function(d) {
+				// returns the color from the color scale
+				return self.getColor(minValue, maxValue, d.value);
+			})
+			.on("mouseover", function(d) {
+				const date = new Date(d.ts);
+				tooltipDiv.style("display", "block")
+				tooltipDiv.html(`${d.value}: ${date.getUTCMonth() + 1}/${date.getUTCDate()}`)
+					.style("left", `${event.pageX - 35}px`)
+					.style("top", `${event.pageY - 40}px`);
+			});
 	}
 
 	getColor(minValue, maxValue, value) {
