@@ -1,0 +1,22 @@
+{
+  "name": "d3-heatmap",
+  "version": "1.0.0",
+  "description": "README ======",
+  "main": "d3-heatmap.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/team-centric-software/simple-d3-heatmap.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/team-centric-software/simple-d3-heatmap/issues"
+  },
+  "homepage": "https://github.com/team-centric-software/simple-d3-heatmap#readme",
+  "devDependencies": {
+    "uglify-js": "^3.5.15"
+  }
+}
