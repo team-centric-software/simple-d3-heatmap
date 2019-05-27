@@ -11,9 +11,11 @@ Preview
 
 #### Yearly:
 ![yearly calendar](dev/heatmap-calendar-yearly.png)
+<hr>
 
 #### Monthly:
 ![monthly calendar](dev/heatmap-calendar-monthly.png)
+<hr>
 
 #### Weekly:
 ![weekly calendar](dev/heatmap-calendar-weekly.png)
