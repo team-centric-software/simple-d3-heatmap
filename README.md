@@ -25,7 +25,7 @@ Getting Started
 
 #### Installation
 
-Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
+Embed the `d3-heatmap.js` as well as [d3.js](https://d3js.org/) in your HTML
 
 ```html
 <script src="https://unpkg.com/d3@5.9.2/dist/d3.min.js"></script>
