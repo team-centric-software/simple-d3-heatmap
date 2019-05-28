@@ -2,4 +2,4 @@ wip/
 node_modules/
 d3.js
 package-lock.json
-d3-heatmap-min.js
+simple-d3-heatmap.min.js

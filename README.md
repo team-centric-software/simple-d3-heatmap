@@ -4,7 +4,7 @@ README
 Description
 -----------------
 
-This Module allows you to create nicely looking heatmap calendars with ease. You can choose between the yearly, monthly and weekly format.
+This module allows you to create nicely looking heatmap calendars with ease. You can choose between yearly, monthly and weekly format.
 
 Preview
 -----------------

@@ -1,11 +1,16 @@
 {
-  "name": "d3-heatmap",
+  "name": "@tcs-open-source/simple-d3-heatmap",
   "version": "1.0.0",
-  "description": "README ======",
-  "main": "d3-heatmap.js",
+  "description": "This module allows you to create nicely looking heatmap calendars with ease.",
+  "main": "simple-d3-heatmap.js",
+  "files": [
+    "simple-d3-heatmap.js",
+    "simple-d3-heatmap.min.js"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "minify": "uglifyjs 'd3-heatmap.js' --compress --mangle --output d3-heatmap-min.js"
+    "minify": "uglifyjs 'simple-d3-heatmap.js' --compress --mangle --output simple-d3-heatmap.min.js",
+    "prepack": "npm run minify"
   },
   "repository": {
     "type": "git",
