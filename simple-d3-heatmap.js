@@ -71,6 +71,23 @@ class SimpleD3Heatmap {
 				.attr("class", this.tooltipClass)
 				.attr("id", "tooltipDiv")
 				.style("display", "none");
+
+			const styling = document.createElement("style");
+			styling.type = "text/css";
+
+			const keyFrames = `@keyframes simple-d3-heatmaps-cubeanim {
+				from {
+					opacity: 0;
+					width: 0;
+					height: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}`;
+
+			styling.innerHTML = keyFrames;
+			document.getElementsByTagName("head")[0].appendChild(styling);
 		}
 	}
 
@@ -209,11 +226,12 @@ class SimpleD3Heatmap {
 		// render the xAxis (Hours)
 		svg.append("g")
 			.attr("class", "timeLine")
+			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
 			.call(xAxis);
 		
 		// render the yAxis (Dates)
 		svg.append("g")
-			.attr("class", "dateLine")
+			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
 			.call(yAxis);
 
 		// add square to heatmap
@@ -228,7 +246,7 @@ class SimpleD3Heatmap {
 			.attr("width", x.bandwidth() )
 			.attr("height", y.bandwidth() )
 			.attr("style", function (d, i) {
-				return `animation: testAnim 0.25s ease-out ${0.00275 * i}s; animation-fill-mode: backwards;`;
+				return `animation: simple-d3-heatmaps-cubeanim 0.25s ease-out ${0.00275 * i}s; animation-fill-mode: backwards;`;
 			})
 			.style("fill", function(d) { return self.getColor(minValue, maxValue, d.value)} )
 			.on("mouseover", function(d) {
@@ -248,6 +266,13 @@ class SimpleD3Heatmap {
 			svg.selectAll("line")
 				.style("opacity", 0);
 		}
+
+		// Remove every second tick
+		const ticks = svg.selectAll(".timeLine > .tick");
+
+		ticks.attr("class", function(d,i){
+			if(i % 2 != 0) d3.select(this).remove();
+		});
 	}
 	
 	/**
@@ -392,17 +417,18 @@ class SimpleD3Heatmap {
 		// render the xAxis (Hours)
 		svg.append("g")
 			.attr("class", "timeLine")
+			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
 			.call(xAxis);
 		
 		// render the yAxis (Dates)
 		svg.append("g")
-			.attr("class", "dateLine")
+			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
 			.call(yAxis);
 
 		if (this.showMonth) {
 			// render the month and date at the top of the heatmap
 			svg.append("text")
-				.attr("style", `font-weight: 700; font-size: 18px; font-family: 'Tahoma';`)
+				.attr("style", `font-weight: 700; font-size: 22px; font-family: 'Tahoma';`)
 				.text(date.toLocaleString(this.locale, { month: "long" }) + " - " + data[0].year)
 				.attr("x", -45)
 				.attr("y", -45);
@@ -418,7 +444,7 @@ class SimpleD3Heatmap {
 			.attr("width", x.bandwidth() )
 			.attr("height", y.bandwidth() )
 			.attr("style", function (d, i) {
-				let style = `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
+				let style = `animation: simple-d3-heatmaps-cubeanim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
 				return style;
 			})
 			.style("fill", function(d) {
@@ -431,17 +457,6 @@ class SimpleD3Heatmap {
 				tooltipDiv.style("left", `${d3.event.pageX - tooltipSize.width/2}px`)
 					.style("top", `${d3.event.pageY - tooltipSize.height - 15}px`);
 			});
-			
-
-		if (!this.showLines) {
-			svg.selectAll("path")
-				.style("opacity", 0);
-			}
-			
-		if (!this.showTicks) {
-			svg.selectAll("line")
-				.style("opacity", 0);
-		}
 
 		const sundays = Array.from(new Set(data.map(el => el.day))).map(day => {
 			const item = data.find(el => el.day === day);
@@ -473,6 +488,23 @@ class SimpleD3Heatmap {
 				// console.log(d.day, spacing);
 				return `M${8 * self.scale},${height} L${width - (8 * self.scale)},${height}`;
 			});
+
+		if (!this.showLines) {
+			svg.selectAll("path")
+				.style("opacity", 0);
+		}
+			
+		if (!this.showTicks) {
+			svg.selectAll("line")
+				.style("opacity", 0);
+		}
+
+		// Remove every second tick
+		const ticks = svg.selectAll(".timeLine > .tick");
+
+		ticks.attr("class", function(d,i){
+			if(i % 4 != 0) d3.select(this).remove();
+		});
 	}
 
 	/**
@@ -506,19 +538,37 @@ class SimpleD3Heatmap {
 		const getDayOfDate = (d) => (new Date(d).getUTCDay() + 6) % 7;
 		const formatDay = d => days[d];
 
-		const container = d3.select(`#${container_id}`)
-			.append("div")
-				.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 12%; vertical-align: top; overflow: hidden;`);
+		let svg;
+		if (window.innerWidth > 800) {
+			const container = d3.select(`#${container_id}`)
+				.append("div")
+					.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 12%; vertical-align: top; overflow: hidden;`);
 
-		// create our base - the svg
-		const svg = container
-			.append("svg")
-				.attr("preserveAspectRatio", "xMinYMin meet")
-				.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-				.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-				.on("mouseout", function(d) {
-					tooltipDiv.style("display", "none")
-				});
+			// create our base - the svg
+			svg = container
+				.append("svg")
+					.attr("preserveAspectRatio", "xMinYMin meet")
+					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+					.on("mouseout", function(d) {
+						tooltipDiv.style("display", "none")
+					});
+		} else {
+			const container = d3.select(`#${container_id}`)
+				.append("div")
+					.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 45%; vertical-align: top; overflow: hidden;`);
+
+			// create our base - the svg
+			svg = container
+				.append("svg")
+					.attr("preserveAspectRatio", "xMinYMin meet")
+					.attr("viewBox", `${-margin.left} ${-margin.top} ${width / 2 + margin.left + margin.right} ${height * 2 + margin.top + margin.bottom}`)
+					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+					.on("mouseout", function(d) {
+						tooltipDiv.style("display", "none")
+					});
+
+		}
 
 		// add the weekdays (monday-sunday)
 		svg.append("g")
@@ -526,11 +576,25 @@ class SimpleD3Heatmap {
 			.selectAll("text")
 			.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
 			.join("text")
-			.attr("style", `font-family: 'Tahoma'; font-size: ${16 * (cubeSize / 25)}px`)
+			.attr("style", `font-family: 'Tahoma'; font-size: ${window.innerWidth > 800 ? 16 : 18}px`)
 			.attr("x", -5)
 			.attr("y", (d, i) => { return (d + 0.5) * (cubeSize * this.scale) + (i * this.gutterSize); })
 			.attr("dy", "0.31em") // give it a little y space from top
 			.text(formatDay);
+
+		if (window.innerWidth < 800) {
+			// add the weekdays (monday-sunday) at the second row
+			svg.append("g")
+				.attr("text-anchor", "end")
+				.selectAll("text")
+				.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
+				.join("text")
+				.attr("style", `font-family: 'Tahoma'; font-size: ${window.innerWidth > 800 ? 16 : 18}px`)
+				.attr("x", -5)
+				.attr("y", (d, i) => { return (d + 1) * (cubeSize * this.scale) + (i * this.gutterSize) + (cubeSize * 8); })
+				.attr("dy", "0.31em") // give it a little y space from top
+				.text(formatDay);
+		}
 
 		// Re-format our data => convert our ts to date/month/year
 		let data2 = [];
@@ -592,17 +656,32 @@ class SimpleD3Heatmap {
 				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
 				.enter()
 				.append("text")
-				.attr("style", `font-family: 'Tahoma'; font-size: 16px`)
+				.attr("style", `font-family: 'Tahoma'; font-size: ${window.innerWidth > 800 ? 16 : 18}px`)
 				.attr("x", function (d, i) {
 					// timeWeek.count(d3.utcYear(d), timeWeek.ceil(d))
 					// d3.utcMonday.count(d3.utcYear(d), d3.utcMonday.ceil(d))
 					const date = new Date(d);
-					
+
+					if (window.innerWidth < 800) {
+						if (d.getUTCMonth() >= 6) {
+							const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
+							return pos * (cubeSize * self.scale) - (cubeSize) - (cubeSize * (6*5));
+						}
+					}
+
 					// d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth())
 					const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
 					return pos * (cubeSize * self.scale);
 				})
-				.attr("y", -5)
+				.attr("y", (d) => {
+					if (window.innerWidth < 800) {
+						if (d.getUTCMonth() >= 6) {
+							return 5 + (cubeSize * 8);
+						}
+					}
+
+					return -5;
+				})
 				.text((d) => {
 					const date = new Date(d);
 					return date.toLocaleString(this.locale, { month: this.dayNameLength }) + " - " + date.getUTCFullYear();
@@ -622,6 +701,12 @@ class SimpleD3Heatmap {
 			.attr("x", function (d, i) {
 				const date = new Date(d.ts);
 				
+				if (window.innerWidth < 800) {
+					if (date.getUTCMonth() >= 6) {
+						const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
+						return pos * (cubeSize * self.scale) - (cubeSize * 2) - (cubeSize * (6*5));
+					}
+				}
 				// d3.utcMonday => gets all "Monday-based" weeks
 				// d3.utcYear => gets the start of the year (e.g. Jan 01 2019)
 
@@ -630,11 +715,17 @@ class SimpleD3Heatmap {
 				// return (d3.utcMonday.count(d3.utcYear(d.date), d.date) * (25 * self.scale)) + d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.gutterSize);
 			})
 			.attr("y", function (d) {
+				if (window.innerWidth < 800) {
+					if (d.month >= 6) {
+						return (getDayOfDate(d.ts) * (cubeSize * self.scale) + 0.5) + getDayOfDate(d.ts) * (self.gutterSize) + 10 + (cubeSize * 8);
+					}
+				}
+
 				// returns the day of the given date of the week (0-6, monday-sunday) * squareize to set the Y position (Monday at the top, Sunday at the bottom)
 				return (getDayOfDate(d.ts) * (cubeSize * self.scale) + 0.5) + getDayOfDate(d.ts) * (self.gutterSize);
 			})
 			.attr("style", function (d, i) {
-				return `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
+				return `animation: simple-d3-heatmaps-cubeanim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
 			})
 			.attr("width", (cubeSize * this.scale) - (1 * this.scale) )
 			.attr("height", (cubeSize * this.scale) - (1 * this.scale) )
