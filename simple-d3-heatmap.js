@@ -71,7 +71,6 @@ class SimpleD3Heatmap {
 				.attr("class", this.tooltipClass)
 				.attr("id", "tooltipDiv")
 				.style("display", "none");
-			console.log("created tooltip")
 		}
 	}
 
