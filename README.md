@@ -35,8 +35,11 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 #### Basic Usage
 
 ```html
+<!-- Create div to append the calendar to -->
 <div id="calendarContainer"></div>
+
 <script>
+	// time series data with the format `timestamp: value` as object
 	const data = {
 		1546254000000: 29,
 		1546257600000: 41,
@@ -45,9 +48,37 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 		1546268400000: 5,
 	};
 
+	// create a new instance of SimpleD3Heatmap
 	const heatmap = new SimpleD3Heatmap();
+	
+	// create a weekly calendar which we will append to `calendarContainer` with the data `data`
 	heatmap.weekly("calendarContainer", data);
 </script>
+
+<!-- Styling for the Tooltip -->
+<style>
+	.d3-calendar-tooltip {
+		background-color: white;
+		border: 2px solid #555;
+		color: black;
+		width: max-content;
+		padding: 3px 12px;
+	}
+
+	.d3-calendar-tooltip:after {
+		box-sizing: border-box;
+		display: inline;
+		font-size: 12px;
+		width: 100%;
+		line-height: 1;
+		color: #555;
+		content: "\25BC";
+		position: absolute;
+		left: 0px;
+		top: 24px;
+		text-align: center;
+	}
+</style>
 ```
 
 Documentation
@@ -73,6 +104,7 @@ Creates an instance of SimpleD3Heatmap.
 | settings.locale | `String` | Locale - language used for months, weekdays and date formats | `"en-US"` | *Optional* |
 | settings.dayNameLength | `String` | Defines the weekday format (long => "Friday", short => "Fri" or narrow => "F") | `"long"` | *Optional* |
 | settings.showMonth | `boolean` | Show the months? | `true` | *Optional* |
+| settings.tooltipClass | `String` | CSS class for the tooltip | `d3-calendar-tooltip` | *Optional* |
 
 ##### Example
 

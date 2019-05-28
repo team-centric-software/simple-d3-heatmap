@@ -17,6 +17,7 @@
  * @param {String} [settings.locale] Locale - language used for months, weekdays and date formats
  * @param {String} [settings.dayNameLength] Defines the weekday format (long => "Friday", short => "Fri" or narrow => "F")
  * @param {boolean} [settings.showMonth] Show the months?
+ * @param {String} [settings.tooltipClass] CSS class for the tooltip
  * 
  * @example 
  * const heatmap = new SimpleD3Heatmap({
@@ -33,6 +34,8 @@
  *     locale: "de-DE", // defines the format of the date in the axis
  *     dayNameLength: "long", // style of the displayed weekday, options => long: "Friday", short: "Fri", narrow: "F" (uses locale)
  *     showMonth: true, // displays the months (uses locale)
+ *     
+ *     tooltipClass: "d3-calendar-tooltip" // CSS class for the tooltip
  * })
  * 
  * @class
@@ -55,12 +58,18 @@ class SimpleD3Heatmap {
 		this.dayNameLength = settings.dayNameLength || "short";
 		this.showMonth = settings.showMonth || true;
 
-		// create tooltip
-		d3.select("body").append("div")
-			.attr("style", "font-family: 'Tahoma'; position: absolute;")
-			.attr("class", "tooltip")
-			.attr("id", "tooltipDiv")
-			.style("display", "none");
+		this.tooltipClass = settings.tooltipClass || "d3-calendar-tooltip";
+
+		// check if tooltipDiv exists
+		if (d3.select("#tooltipDiv").empty()) {
+			// create tooltip
+			d3.select("body").append("div")
+				.attr("style", "font-family: 'Tahoma'; position: absolute;")
+				.attr("class", this.tooltipClass)
+				.attr("id", "tooltipDiv")
+				.style("display", "none");
+			console.log("created tooltip")
+		}
 	}
 
 	/**
@@ -90,7 +99,7 @@ class SimpleD3Heatmap {
 			const weekInYear = Math.ceil( (((date - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7 );
 
 			data2.push({
-				day: date.getUTCDay() - 1,
+				day: date.getUTCDay(),
 				hour: date.getUTCHours(),
 				week: weekInYear,
 				year: date.getUTCFullYear(),
@@ -198,10 +207,11 @@ class SimpleD3Heatmap {
 			})
 			.style("fill", function(d) { return self.getColor(minValue, maxValue, d.value)} )
 			.on("mouseover", function(d) {
-				tooltipDiv.style("display", "block");
-				tooltipDiv.html(d.value)
-					.style("left", `${d3.event.pageX - 17.5}px`)
-					.style("top", `${d3.event.pageY - 45}px`);
+				tooltipDiv.style("display", "block")
+					.html(d.value);
+				const tooltipSize = tooltipDiv.node().getBoundingClientRect();
+				tooltipDiv.style("left", `${d3.event.pageX - tooltipSize.width/2}px`)
+					.style("top", `${d3.event.pageY - tooltipSize.height - 15}px`);
 			});
 
 		if (!this.showLines) {
@@ -243,8 +253,6 @@ class SimpleD3Heatmap {
 			});
 		});
 		data = data2;
-
-		console.log(data);
 
 		// create a date object from our current month and year
 		const date = new Date(data[0].year, data[0].month + 1, 0);
@@ -298,15 +306,15 @@ class SimpleD3Heatmap {
 		// create our base - the svg
 		const svg = d3.select(`#${container_id}`)
 			.append("div")
-			.attr("style", "display: inline-block;")
+				.attr("style", "display: inline-block;")
 			.append("svg")
-			.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom - paddingBottom)
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom - paddingBottom)
 			.append("g")
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			.on("mouseout", function(d) {
-				tooltipDiv.style("display", "none")
-			});
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+				.on("mouseout", function(d) {
+					tooltipDiv.style("display", "none")
+				});
 
 		// Create a new ScaleBand for the X Axis
 		const x = d3.scaleBand()
@@ -328,7 +336,7 @@ class SimpleD3Heatmap {
 		});
 		// Format the Ticks of the yAxis (Dates)
 		const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
-			const date = new Date(data[0].year, data[0].month, d + 1);
+			const date = new Date(data[0].year, data[0].month, d - 1);
 			const dayMonth = date.toLocaleString(this.locale, {
 				month: "2-digit",
 				day: "2-digit",
@@ -376,10 +384,11 @@ class SimpleD3Heatmap {
 				return self.getColor(minValue, maxValue, d.value);
 			})
 			.on("mouseover", function(d) {
-				tooltipDiv.style("display", "block");
-				tooltipDiv.html(d.value)
-					.style("left", `${d3.event.pageX - 17.5}px`)
-					.style("top", `${d3.event.pageY - 45}px`);
+				tooltipDiv.style("display", "block")
+					.html(d.value);
+				const tooltipSize = tooltipDiv.node().getBoundingClientRect();
+				tooltipDiv.style("left", `${d3.event.pageX - tooltipSize.width/2}px`)
+					.style("top", `${d3.event.pageY - tooltipSize.height - 15}px`);
 			});
 			
 
@@ -526,7 +535,7 @@ class SimpleD3Heatmap {
 		if (this.showMonth) {
 			// add the month labels
 			svg.selectAll()
-				.data(d3.utcMonths(new Date(data[0].year, data[0].month + 1, -1), new Date(data[data.length - 1].year, data[data.length - 1].month + 1, 32)))
+				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
 				.enter()
 				.append("text")
 				.attr("style", "font-family: 'Tahoma';")
@@ -542,7 +551,6 @@ class SimpleD3Heatmap {
 				.attr("y", -5)
 				.text((d) => {
 					const date = new Date(d);
-					console.log(d);
 					return date.toLocaleString(this.locale, { month: this.dayNameLength }) + " - " + date.getUTCFullYear();
 				});
 		}
@@ -581,11 +589,11 @@ class SimpleD3Heatmap {
 				return self.getColor(minValue, maxValue, d.value);
 			})
 			.on("mouseover", function(d) {
-				const date = new Date(d.ts);
 				tooltipDiv.style("display", "block")
-				tooltipDiv.html(`${d.value}: ${date.getUTCMonth() + 1}/${date.getUTCDate()}`)
-					.style("left", `${event.pageX - 35}px`)
-					.style("top", `${event.pageY - 40}px`);
+					.html(d.value);
+				const tooltipSize = tooltipDiv.node().getBoundingClientRect();
+				tooltipDiv.style("left", `${d3.event.pageX - tooltipSize.width/2}px`)
+					.style("top", `${d3.event.pageY - tooltipSize.height - 15}px`);
 			});
 	}
 

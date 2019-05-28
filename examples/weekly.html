@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>D3 Calendar Heatmap Example - Weekly</title>
+
+		<!-- Styling for the Tooltip -->
+		<style>
+			.d3-calendar-tooltip {
+				background-color: white;
+				border: 2px solid #555;
+				color: black;
+				width: max-content;
+				padding: 3px 12px;
+			}
+
+			.d3-calendar-tooltip:after {
+				box-sizing: border-box;
+				display: inline;
+				font-size: 12px;
+				width: 100%;
+				line-height: 1;
+				color: #555;
+				content: "\25BC";
+				position: absolute;
+				left: 0px;
+				top: 24px;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="calendarContainer"></div>
+
+		<script src="../d3.js"></script>
+		<script src="../d3-heatmap.js"></script>
+		<script>
+			const heatmap = new SimpleD3Heatmap();
+
+			const ONE_HOUR_IN_MILLISECONDS = 3600000;
+			const ONE_DAY_IN_MILLISECONDS = 86400000;
+
+			// create random data for one week
+			function generateWeeklyData() {
+				// create date object @ february 2017 and convert it to a timestamp
+				let startDate = new Date(2017, 1, 0).getTime();
+				const dataOfOneWeek = {};
+
+				// a week has 7 days
+				for (let i = 0; i < 7; i++) {
+					const dayTS = startDate + (ONE_DAY_IN_MILLISECONDS * i);
+
+					// a day has 24 hours
+					for (let j = 0; j < 24; j++) {
+						const hourTS = dayTS + (ONE_HOUR_IN_MILLISECONDS * j);
+
+						// only add data if its between hours 6 and 18
+						if (j <= 18 && j >= 6) {
+							dataOfOneWeek[hourTS] = (Math.random() * 50) + j;
+						}
+					}
+				}
+
+				// return our generated data
+				return dataOfOneWeek;
+			}
+
+			// create calendar heatmap
+			const generatedData = generateWeeklyData();
+			heatmap.weekly("calendarContainer", generatedData);
+		</script>
+	</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>D3 Calendar Heatmap Example - Yearly</title>
+
+		<!-- Styling for the Tooltip -->
+		<style>
+			.d3-calendar-tooltip {
+				background-color: white;
+				border: 2px solid #555;
+				color: black;
+				width: max-content;
+				padding: 3px 12px;
+			}
+
+			.d3-calendar-tooltip:after {
+				box-sizing: border-box;
+				display: inline;
+				font-size: 12px;
+				width: 100%;
+				line-height: 1;
+				color: #555;
+				content: "\25BC";
+				position: absolute;
+				left: 0px;
+				top: 24px;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="calendarContainer"></div>
+
+		<script src="../d3.js"></script>
+		<script src="../d3-heatmap.js"></script>
+		<script>
+			const heatmap = new SimpleD3Heatmap();
+
+			const ONE_HOUR_IN_MILLISECONDS = 3600000;
+			const ONE_DAY_IN_MILLISECONDS = 86400000;
+
+			// Yearly
+			function generateYearData() {
+				let startDate = new Date(2017, 0).getTime();
+				const dataOfOneYear = {};
+				
+				// create data for every day of the year
+				for (let i = 0; i < 365; i++) {
+					// add one day 
+					const date = startDate + (ONE_DAY_IN_MILLISECONDS * i);
+
+					// add data to object with random value
+					dataOfOneYear[date] = Math.floor(Math.random() * 400);
+				}
+
+				// return our newly generated data
+				return dataOfOneYear;
+			}
+
+			// create calendar heatmap
+			const generatedData = generateYearData();
+			heatmap.yearly("calendarContainer", generatedData);
+		</script>
+	</body>
+</html>

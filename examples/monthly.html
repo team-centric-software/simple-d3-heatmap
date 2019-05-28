@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>D3 Calendar Heatmap Example - Monthly</title>
+
+		<!-- Styling for the Tooltip -->
+		<style>
+			.d3-calendar-tooltip {
+				background-color: white;
+				border: 2px solid #555;
+				color: black;
+				width: max-content;
+				padding: 3px 12px;
+			}
+
+			.d3-calendar-tooltip:after {
+				box-sizing: border-box;
+				display: inline;
+				font-size: 12px;
+				width: 100%;
+				line-height: 1;
+				color: #555;
+				content: "\25BC";
+				position: absolute;
+				left: 0px;
+				top: 24px;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="calendarContainer"></div>
+
+		<script src="../d3.js"></script>
+		<script src="../d3-heatmap.js"></script>
+		<script>
+			const heatmap = new SimpleD3Heatmap();
+
+			const ONE_HOUR_IN_MILLISECONDS = 3600000;
+			const ONE_DAY_IN_MILLISECONDS = 86400000;
+
+			// generate random data for one month
+			function generateMonthlyData() {
+				// initialize date object as february 2017, create dataOfOneMonth object
+				let startDate = new Date(2017, 1);
+				const dataOfOneMonth = {};
+
+				// convert date object to timestamp
+				startDate = startDate.getTime();
+
+				// go through all days in month (february has 28 days)
+				for (let i = 0; i < 28; i++) {
+					// grab startDate and add (ONE_DAY_IN_MILLISECONDS * i)
+					let dataTS = startDate + (ONE_DAY_IN_MILLISECONDS * i);
+
+					// go through 24 hours in one day
+					for (let j = 0; j < 24; j++) {
+						// add ONE_HOUR_IN_MILLISECONDS to dataTS
+						const dayHourTS = dataTS + (ONE_HOUR_IN_MILLISECONDS * j);
+
+						// only add the data to object if its between hours 6 and 18
+						if (j <= 18 && j >= 6) {
+							dataOfOneMonth[dayHourTS] = (Math.random() * 30) + j;
+						}
+					}
+				}
+
+				// return our newly generated data
+				return dataOfOneMonth;
+			}
+
+			// create calendar heatmap
+			const generatedData = generateMonthlyData();
+			heatmap.monthly("calendarContainer", generatedData);
+		</script>
+	</body>
+</html>
