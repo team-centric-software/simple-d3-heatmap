@@ -114,16 +114,19 @@ class SimpleD3Heatmap {
 
 		const week = data[0].week;
 
+		const container = d3.select(`#${container_id}`)
+			.append("div")
+				.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 13%; vertical-align: top; overflow: hidden;`);
+
 		// create our base - the svg
-		const svg = d3.select(`#${container_id}`)
+		const svg = container
 			.append("svg")
-			.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom)
-			.append("g")
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			.on("mouseout", function(d) {
-				tooltipDiv.style("display", "none")
-			});
+				.attr("preserveAspectRatio", "xMinYMin meet")
+				.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+				.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+				.on("mouseout", function(d) {
+					tooltipDiv.style("display", "none")
+				});
 
 		// create localized weekdays (mo - fr)
 		let days = [];
@@ -213,7 +216,7 @@ class SimpleD3Heatmap {
 			.style("fill", function(d) { return self.getColor(minValue, maxValue, d.value)} )
 			.on("mouseover", function(d) {
 				tooltipDiv.style("display", "block")
-					.html(JSON.stringify(d));
+					.html(d.value);
 				const tooltipSize = tooltipDiv.node().getBoundingClientRect();
 				tooltipDiv.style("left", `${d3.event.pageX - tooltipSize.width/2}px`)
 					.style("top", `${d3.event.pageY - tooltipSize.height - 15}px`);
@@ -303,24 +306,25 @@ class SimpleD3Heatmap {
 		// set our margin's, width and height
 		const margin = { left: 100, right: 25, top: this.showMonth ? 75 : 25, bottom: 25 };
 		const width = (692 * this.scale) - (margin.left + margin.right);
-		let height = ((26 * daysInMonth) * this.scale) - (margin.top + margin.bottom);
+		let height = ((27 * daysInMonth) * this.scale) - (margin.top + margin.bottom);
 		this.showMonth ? "" : height -= 50; // remove 50px which were needed for the "Month - Year" text
 		
 		const paddingBottom = (height + margin.top + margin.bottom) - (806 * this.scale);
 
-		// create our base - the svg
-		const svg = d3.select(`#${container_id}`)
+		const container = d3.select(`#${container_id}`)
 			.append("div")
-				.attr("style", "display: inline-block;")
+				.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 45%; vertical-align: top; overflow: hidden;`);
+
+		// create our base - the svg
+		const svg = container
 			.append("svg")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom - paddingBottom)
-			.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+				.attr("preserveAspectRatio", "xMinYMin meet")
+				.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+				.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
 				.on("mouseout", function(d) {
 					tooltipDiv.style("display", "none")
 				});
-
+				
 		// Create a new ScaleBand for the X Axis
 		const x = d3.scaleBand()
 			.range([0, width])
@@ -366,8 +370,8 @@ class SimpleD3Heatmap {
 		if (this.showMonth) {
 			// render the month and date at the top of the heatmap
 			svg.append("text")
+				.attr("style", `font-weight: 700; font-size: 18px; font-family: 'Tahoma';`)
 				.text(date.toLocaleString(this.locale, { month: "long" }) + " - " + data[0].year)
-				.attr("style", "font-weight: 700; font-size: 18px; font-family: 'Tahoma';")
 				.attr("x", -45)
 				.attr("y", -45);
 		}
@@ -453,10 +457,11 @@ class SimpleD3Heatmap {
 		const maxValue = Math.max(...Object.values(data));
 		const minValue = Math.min(...Object.values(data));
 
+		const cubeSize = 25;
 		// set our margin's, width and height
 		const margin = { left: 85, right: 0, top: this.showMonth ? 25 : 0, bottom: 0 };
-		const width = 52 * (25 * this.scale) + (margin.left + margin.right) + (12 * 25);
-		const height = 7 * (25 * this.scale) + (margin.top + margin.bottom);
+		const width = 52 * (cubeSize * this.scale) + (margin.left + margin.right) + (12 * 25);
+		const height = 7 * (cubeSize * this.scale) + (margin.top + margin.bottom);
 
 		// create localized weekdays (mo - fr)
 		let days = [];
@@ -469,16 +474,19 @@ class SimpleD3Heatmap {
 		const getDayOfDate = (d) => (new Date(d).getUTCDay() + 6) % 7;
 		const formatDay = d => days[d];
 
+		const container = d3.select(`#${container_id}`)
+			.append("div")
+				.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 12%; vertical-align: top; overflow: hidden;`);
+
 		// create our base - the svg
-		const svg = d3.select(`#${container_id}`)
+		const svg = container
 			.append("svg")
-			.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom)
-			.append("g")
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			.on("mouseout", function(d) {
-				tooltipDiv.style("display", "none")
-			});
+				.attr("preserveAspectRatio", "xMinYMin meet")
+				.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+				.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+				.on("mouseout", function(d) {
+					tooltipDiv.style("display", "none")
+				});
 
 		// add the weekdays (monday-sunday)
 		svg.append("g")
@@ -486,9 +494,9 @@ class SimpleD3Heatmap {
 			.selectAll("text")
 			.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
 			.join("text")
-			.attr("style", "font-family: 'Tahoma';")
+			.attr("style", `font-family: 'Tahoma'; font-size: ${16 * (cubeSize / 25)}px`)
 			.attr("x", -5)
-			.attr("y", (d, i) => { return (d + 0.5) * (25 * this.scale) + (i * this.gutterSize); })
+			.attr("y", (d, i) => { return (d + 0.5) * (cubeSize * this.scale) + (i * this.gutterSize); })
 			.attr("dy", "0.31em") // give it a little y space from top
 			.text(formatDay);
 
@@ -512,7 +520,11 @@ class SimpleD3Heatmap {
 		});
 
 		// get the oldest available date
-		const oldest = new Date(data[0].ts).getTime();
+		let oldest = new Date(data[0].ts);
+		if (!data.find(el => el.month === oldest.getMonth() - 1)) {
+			oldest.setMonth(0);
+		}
+		oldest = oldest.getTime();
 
 		// go through all 365 days
 		for (let i = 0; i < 365; i++) {
@@ -537,13 +549,18 @@ class SimpleD3Heatmap {
 			}
 		}
 		
+		// sort by date
+		data.sort((a, b) => {
+			return a.ts - b.ts;
+		});
+		
 		if (this.showMonth) {
 			// add the month labels
 			svg.selectAll()
 				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
 				.enter()
 				.append("text")
-				.attr("style", "font-family: 'Tahoma';")
+				.attr("style", `font-family: 'Tahoma'; font-size: 16px`)
 				.attr("x", function (d, i) {
 					// timeWeek.count(d3.utcYear(d), timeWeek.ceil(d))
 					// d3.utcMonday.count(d3.utcYear(d), d3.utcMonday.ceil(d))
@@ -551,7 +568,7 @@ class SimpleD3Heatmap {
 					
 					// d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth())
 					const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
-					return pos * (25 * self.scale);
+					return pos * (cubeSize * self.scale);
 				})
 				.attr("y", -5)
 				.text((d) => {
@@ -577,18 +594,18 @@ class SimpleD3Heatmap {
 				// d3.utcYear => gets the start of the year (e.g. Jan 01 2019)
 
 				// returns current week of the year * squaresize
-				return (d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth()) * (25 * self.scale);
+				return (d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth()) * (cubeSize * self.scale);
 				// return (d3.utcMonday.count(d3.utcYear(d.date), d.date) * (25 * self.scale)) + d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.gutterSize);
 			})
 			.attr("y", function (d) {
 				// returns the day of the given date of the week (0-6, monday-sunday) * squareize to set the Y position (Monday at the top, Sunday at the bottom)
-				return (getDayOfDate(d.ts) * (25 * self.scale) + 0.5) + getDayOfDate(d.ts) * (self.gutterSize);
+				return (getDayOfDate(d.ts) * (cubeSize * self.scale) + 0.5) + getDayOfDate(d.ts) * (self.gutterSize);
 			})
 			.attr("style", function (d, i) {
 				return `animation: testAnim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
 			})
-			.attr("width", (25 * this.scale) - (1* this.scale) )
-			.attr("height", (25 * this.scale) - (1* this.scale) )
+			.attr("width", (cubeSize * this.scale) - (1 * this.scale) )
+			.attr("height", (cubeSize * this.scale) - (1 * this.scale) )
 			.style("fill", function(d) {
 				// returns the color from the color scale
 				return self.getColor(minValue, maxValue, d.value);
