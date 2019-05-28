@@ -60,7 +60,7 @@
 
 						// only add data if its between hours 6 and 18
 						if (j <= 18 && j >= 6) {
-							dataOfOneWeek[hourTS] = (Math.random() * 50) + j;
+							dataOfOneWeek[hourTS] = Math.floor(Math.random() * 50) + j;
 						}
 					}
 				}

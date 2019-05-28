@@ -65,7 +65,7 @@
 
 						// only add the data to object if its between hours 6 and 18
 						if (j <= 18 && j >= 6) {
-							dataOfOneMonth[dayHourTS] = (Math.random() * 30) + j;
+							dataOfOneMonth[dayHourTS] = Math.floor(Math.random() * 30) + j;
 						}
 					}
 				}
