@@ -1,6 +1,6 @@
 {
   "name": "@tcs-open-source/simple-d3-heatmap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This module allows you to create nicely looking heatmap calendars with ease.",
   "main": "simple-d3-heatmap.js",
   "files": [
