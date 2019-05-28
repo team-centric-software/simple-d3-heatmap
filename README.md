@@ -65,7 +65,7 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 		padding: 3px 12px;
 	}
 
-	.d3-calendar-tooltip:after {
+	.d3-calendar-tooltip::after {
 		box-sizing: border-box;
 		display: inline;
 		font-size: 12px;
@@ -80,6 +80,8 @@ Embed the `d3-heatmap.js` aswell as [d3.js](https://d3js.org/) in your HTML
 	}
 </style>
 ```
+
+Monthly heatmap calendar live preview: [JSFiddle Playground](https://jsfiddle.net/vwrjbaps/4/)
 
 Documentation
 -----------------
