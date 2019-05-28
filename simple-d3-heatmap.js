@@ -114,19 +114,36 @@ class SimpleD3Heatmap {
 
 		const week = data[0].week;
 
-		const container = d3.select(`#${container_id}`)
+		let svg;
+		if (window.innerWidth > 800) {
+			const container = d3.select(`#${container_id}`)
+				.append("div")
+					.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 13%; vertical-align: top; overflow: hidden;`);
+	
+			// create our base - the svg
+			svg = container
+				.append("svg")
+					.attr("preserveAspectRatio", "xMinYMin meet")
+					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+					.on("mouseout", function(d) {
+						tooltipDiv.style("display", "none")
+					});
+		} else {
+			const container = d3.select(`#${container_id}`)
 			.append("div")
-				.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 13%; vertical-align: top; overflow: hidden;`);
+				.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 32%; vertical-align: top; overflow: hidden;`);
 
-		// create our base - the svg
-		const svg = container
-			.append("svg")
-				.attr("preserveAspectRatio", "xMinYMin meet")
-				.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-				.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-				.on("mouseout", function(d) {
-					tooltipDiv.style("display", "none")
-				});
+			// create our base - the svg
+			svg = container
+				.append("svg")
+					.attr("preserveAspectRatio", "xMinYMin meet")
+					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+					.on("mouseout", function(d) {
+						tooltipDiv.style("display", "none")
+					});
+		}
 
 		// create localized weekdays (mo - fr)
 		let days = [];
@@ -308,22 +325,37 @@ class SimpleD3Heatmap {
 		const width = (692 * this.scale) - (margin.left + margin.right);
 		let height = ((27 * daysInMonth) * this.scale) - (margin.top + margin.bottom);
 		this.showMonth ? "" : height -= 50; // remove 50px which were needed for the "Month - Year" text
-		
-		const paddingBottom = (height + margin.top + margin.bottom) - (806 * this.scale);
 
-		const container = d3.select(`#${container_id}`)
+		let svg;
+		if (window.innerWidth > 800) {
+			const container = d3.select(`#${container_id}`)
 			.append("div")
-				.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 45%; vertical-align: top; overflow: hidden;`);
+				.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 48%; vertical-align: top; overflow: hidden;`);
 
-		// create our base - the svg
-		const svg = container
-			.append("svg")
-				.attr("preserveAspectRatio", "xMinYMin meet")
-				.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-				.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-				.on("mouseout", function(d) {
-					tooltipDiv.style("display", "none")
-				});
+			// create our base - the svg
+			svg = container
+				.append("svg")
+					.attr("preserveAspectRatio", "xMinYMin meet")
+					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+					.on("mouseout", function(d) {
+						tooltipDiv.style("display", "none")
+					});
+		} else {
+			const container = d3.select(`#${container_id}`)
+			.append("div")
+				.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 120%; vertical-align: top; overflow: hidden;`);
+
+			// create our base - the svg
+			svg = container
+				.append("svg")
+					.attr("preserveAspectRatio", "xMinYMin meet")
+					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+					.on("mouseout", function(d) {
+						tooltipDiv.style("display", "none")
+					});
+		}
 				
 		// Create a new ScaleBand for the X Axis
 		const x = d3.scaleBand()
@@ -345,7 +377,7 @@ class SimpleD3Heatmap {
 		});
 		// Format the Ticks of the yAxis (Dates)
 		const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
-			const date = new Date(data[0].year, data[0].month, d - 1);
+			const date = new Date(data[0].year, data[0].month, d + 1);
 			const dayMonth = date.toLocaleString(this.locale, {
 				month: "2-digit",
 				day: "2-digit",
