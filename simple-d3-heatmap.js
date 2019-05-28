@@ -18,6 +18,7 @@
  * @param {String} [settings.dayNameLength] Defines the weekday format (long => "Friday", short => "Fri" or narrow => "F")
  * @param {boolean} [settings.showMonth] Show the months?
  * @param {String} [settings.tooltipClass] CSS class for the tooltip
+ * @param {boolean} [settings.includeWeekend] Show saturday and sunday? (Only weekly calendar heatmap)
  * 
  * @example 
  * const heatmap = new SimpleD3Heatmap({
@@ -34,6 +35,7 @@
  *     locale: "de-DE", // defines the format of the date in the axis
  *     dayNameLength: "long", // style of the displayed weekday, options => long: "Friday", short: "Fri", narrow: "F" (uses locale)
  *     showMonth: true, // displays the months (uses locale)
+ *     includeWeekend: true, // Show saturday and sunday? Only for weekly calendar heatmap
  *     
  *     tooltipClass: "d3-calendar-tooltip" // CSS class for the tooltip
  * })
@@ -57,6 +59,7 @@ class SimpleD3Heatmap {
 		this.locale = settings.locale || "en-US";
 		this.dayNameLength = settings.dayNameLength || "short";
 		this.showMonth = settings.showMonth || true;
+		this.includeWeekend = settings.includeWeekend || true;
 
 		this.tooltipClass = settings.tooltipClass || "d3-calendar-tooltip";
 
@@ -82,11 +85,13 @@ class SimpleD3Heatmap {
 	weekly(container_id, data) {
 		const self = this;
 
+		const daysInWeek = this.includeWeekend ? 7 : 5;
+
 		const tooltipDiv = d3.select("#tooltipDiv");
 		
 		const margin = { left: 75, right: 25, top: 25, bottom: 10 };
 		const width = (715 * this.scale) - (margin.left + margin.right);
-		let height = (225 * this.scale) - (margin.top + margin.bottom);
+		let height = (this.includeWeekend ? 225 : 175 * this.scale) - (margin.top + margin.bottom);
 
 		const maxValue = Math.max(...Object.values(data));
 		const minValue = Math.min(...Object.values(data));
@@ -95,16 +100,16 @@ class SimpleD3Heatmap {
 		let data2 = [];
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
-			const startOfYear = new Date(date.getFullYear(), 0, 1);
-			const weekInYear = Math.ceil( (((date - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7 );
 
-			data2.push({
-				day: date.getUTCDay(),
-				hour: date.getUTCHours(),
-				week: weekInYear,
-				year: date.getUTCFullYear(),
-				value: parseFloat(data[d])
-			});
+			if (date.getUTCDay() + 1 <= daysInWeek) {
+				data2.push({
+					day: date.getUTCDay(),
+					hour: date.getUTCHours(),
+					year: date.getUTCFullYear(),
+					date: date.toISOString(),
+					value: parseFloat(data[d])
+				});
+			}
 		});
 		data = data2;
 
@@ -123,13 +128,13 @@ class SimpleD3Heatmap {
 
 		// create localized weekdays (mo - fr)
 		let days = [];
-		for (let i = 0; i < 7; i++) {
+		for (let i = 0; i < daysInWeek; i++) {
 			const day = new Date(2019, 0, i);
 			days.push(day.toLocaleString(this.locale, {weekday: this.dayNameLength}));
 		}
 
 		// go through all days in the week
-		for (let i = 0; i < 7; i++) {
+		for (let i = 0; i < daysInWeek; i++) {
 			// go through all 24 hours
 			for (let j = 0; j < 24; j++) {
 				// check if data for this time exists
@@ -138,7 +143,6 @@ class SimpleD3Heatmap {
 				if (!item) {
 					data.push({
 						day: parseFloat(i), // range: 0-6
-						week: parseFloat(week), // week of the year - range: 0-53
 						hour: parseFloat(j), // range: 0 - 23
 						year: parseFloat(data[0].year), // e.g. 2017
 						value: 0 // e.g. 5
@@ -199,7 +203,9 @@ class SimpleD3Heatmap {
 			.enter()
 			.append("rect")
 			.attr("x", function(d) { return x(d.hour) })
-			.attr("y", function(d) { return y(days[d.day]) })
+			.attr("y", function(d) { 
+				return y(days[d.day]);
+			})
 			.attr("width", x.bandwidth() )
 			.attr("height", y.bandwidth() )
 			.attr("style", function (d, i) {
@@ -208,7 +214,7 @@ class SimpleD3Heatmap {
 			.style("fill", function(d) { return self.getColor(minValue, maxValue, d.value)} )
 			.on("mouseover", function(d) {
 				tooltipDiv.style("display", "block")
-					.html(d.value);
+					.html(JSON.stringify(d));
 				const tooltipSize = tooltipDiv.node().getBoundingClientRect();
 				tooltipDiv.style("left", `${d3.event.pageX - tooltipSize.width/2}px`)
 					.style("top", `${d3.event.pageY - tooltipSize.height - 15}px`);

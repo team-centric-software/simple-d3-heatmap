@@ -106,7 +106,8 @@ Creates an instance of SimpleD3Heatmap.
 | settings.locale | `String` | Locale - language used for months, weekdays and date formats | `"en-US"` | *Optional* |
 | settings.dayNameLength | `String` | Defines the weekday format (long => "Friday", short => "Fri" or narrow => "F") | `"long"` | *Optional* |
 | settings.showMonth | `boolean` | Show the months? | `true` | *Optional* |
-| settings.tooltipClass | `String` | CSS class for the tooltip | `d3-calendar-tooltip` | *Optional* |
+| settings.tooltipClass | `String` | CSS class for the tooltip | `"d3-calendar-tooltip"` | *Optional* |
+| settings.includeWeekend | `boolean` | Show saturday and sunday? Only for weekly calendar heatmap | `true` | *Optional* |
 
 ##### Example
 
