@@ -133,35 +133,19 @@ class SimpleD3Heatmap {
 		});
 		data = data2;
 
-		let svg;
-		if (!this.mobileView) {
-			const container = d3.select(`#${container_id}`)
-				.append("div")
-					.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 13%; vertical-align: top; overflow: hidden;`);
-	
-			// create our base - the svg
-			svg = container
-				.append("svg")
-					.attr("preserveAspectRatio", "xMinYMin meet")
-					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-					.on("mouseout", function(d) {
-						tooltipDiv.style("display", "none")
-					});
-		} else {
-			const container = d3.select(`#${container_id}`)
-			.append("div")
-				.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 32%; vertical-align: top; overflow: hidden;`);
+		const container = d3.select(`#${container_id}`).append("div");
+		const svg = container.append("svg")
+			.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+			.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+			.attr("preserveAspectRatio", "xMinYMin meet")
+			.on("mouseout", function(d) {
+				tooltipDiv.style("display", "none")
+			});
 
-			// create our base - the svg
-			svg = container
-				.append("svg")
-					.attr("preserveAspectRatio", "xMinYMin meet")
-					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-					.on("mouseout", function(d) {
-						tooltipDiv.style("display", "none")
-					});
+		if (!this.mobileView) {
+			container.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 13%; vertical-align: top; overflow: hidden;`);
+		} else {
+			container.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 32%; vertical-align: top; overflow: hidden;`);
 		}
 
 		// create localized weekdays (mo - fr)
@@ -354,37 +338,21 @@ class SimpleD3Heatmap {
 		let height = ((27 * daysInMonth) * this.scale) - (margin.top + margin.bottom);
 		this.showMonth ? "" : height -= 50; // remove 50px which were needed for the "Month - Year" text
 
-		let svg;
+		const container = d3.select(`#${container_id}`).append("div");
+		const svg = container.append("svg")
+			.attr("preserveAspectRatio", "xMinYMin meet")
+			.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+			.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+			.on("mouseout", function(d) {
+				tooltipDiv.style("display", "none")
+			});
+
 		if (!this.mobileView) {
-			const container = d3.select(`#${container_id}`)
-			.append("div")
-				.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 48%; vertical-align: top; overflow: hidden;`);
-
-			// create our base - the svg
-			svg = container
-				.append("svg")
-					.attr("preserveAspectRatio", "xMinYMin meet")
-					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-					.on("mouseout", function(d) {
-						tooltipDiv.style("display", "none")
-					});
+			container.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 48%; vertical-align: top; overflow: hidden;`);
 		} else {
-			const container = d3.select(`#${container_id}`)
-			.append("div")
-				.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 120%; vertical-align: top; overflow: hidden;`);
-
-			// create our base - the svg
-			svg = container
-				.append("svg")
-					.attr("preserveAspectRatio", "xMinYMin meet")
-					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-					.on("mouseout", function(d) {
-						tooltipDiv.style("display", "none")
-					});
+			container.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 120%; vertical-align: top; overflow: hidden;`);
 		}
-				
+
 		// Create a new ScaleBand for the X Axis
 		const x = d3.scaleBand()
 			.range([0, width])
@@ -540,36 +508,22 @@ class SimpleD3Heatmap {
 		// returns the given date's day as int (0 - 6)
 		const getDayOfDate = (d) => (new Date(d).getUTCDay() + 6) % 7;
 
-		let svg;
+		const container = d3.select(`#${container_id}`).append("div")
+		const svg = container.append("svg")
+		.	attr("preserveAspectRatio", "xMinYMin meet")
+			.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
+			.on("mouseout", function(d) {
+				tooltipDiv.style("display", "none")
+			});;
+
 		if (!this.mobileView) {
-			const container = d3.select(`#${container_id}`)
-				.append("div")
-					.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 12%; vertical-align: top; overflow: hidden;`);
+			container.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 12%; vertical-align: top; overflow: hidden;`);
 
-			// create our base - the svg
-			svg = container
-				.append("svg")
-					.attr("preserveAspectRatio", "xMinYMin meet")
-					.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-					.on("mouseout", function(d) {
-						tooltipDiv.style("display", "none")
-					});
+			svg.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
 		} else {
-			const container = d3.select(`#${container_id}`)
-				.append("div")
-					.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 166%; vertical-align: top; overflow: hidden;`);
-
-			// create our base - the svg
-			svg = container
-				.append("svg")
-					.attr("preserveAspectRatio", "xMinYMin meet")
-					.attr("viewBox", `${-margin.left} ${-margin.top} ${width / 4 + margin.left + margin.right} ${height * 4 + margin.top + margin.bottom + 15}`)
-					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
-					.on("mouseout", function(d) {
-						tooltipDiv.style("display", "none")
-					});
-
+			container.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 166%; vertical-align: top; overflow: hidden;`);
++
+			svg.attr("viewBox", `${-margin.left} ${-margin.top} ${width / 4 + margin.left + margin.right} ${height * 4 + margin.top + margin.bottom + 15}`)
 		}
 
 		// add the weekdays (monday-sunday)
