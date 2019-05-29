@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>Simple D3 Heatmap</title>
+
+		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jotted@latest/jotted.min.css">
+		<style>
+		body {
+			font-family: "Tahoma", Arial, serif;
+		}
+		</style>
+	</head>
+
+	<body>
+		<div id="spacer"><h2>Yearly:</h2></div>
+		<div id="editor_yearly" class="jotted-theme-bin" style="height: 30em;"></div>
+		<div id="spacer"><h2>Monthly:</h2></div>
+		<div id="editor_monthly" class="jotted-theme-bin"  style="height: 30em; width: 100%;"></div>
+		<div id="spacer"><h2>Weekly:</h2></div>
+		<div id="editor_weekly" class="jotted-theme-bin" style="height: 30em;"></div>
+		<div style="height: 1em;"></div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js"></script>
+		<!-- Require jotted -->
+		<script src="https://cdn.jsdelivr.net/npm/jotted@latest/jotted.min.js"></script>
+		<!-- Require custom script -->
+
+		<script>
+		const yearly_html =
+		`<div id="yearlyCalendar"></div>
+
+\<script src="https://unpkg.com/d3@5.9.2/dist/d3.min.js"\>\</script\>
+\<script src="https://unpkg.com/@tcs-open-source/simple-d3-heatmap@latest/simple-d3-heatmap.min.js"\>\</script\>
+		`;
+
+		const monthly_html =
+		`<div id="monthlyCalendar"></div>
+
+\<script src="https://unpkg.com/d3@5.9.2/dist/d3.min.js"\>\</script\>
+\<script src="https://unpkg.com/@tcs-open-source/simple-d3-heatmap@latest/simple-d3-heatmap.min.js"\>\</script\>
+		`;
+
+		const weekly_html =
+		`<div id="weeklyCalendar"></div>
+
+\<script src="https://unpkg.com/d3@5.9.2/dist/d3.min.js"\>\</script\>
+\<script src="https://unpkg.com/@tcs-open-source/simple-d3-heatmap@latest/simple-d3-heatmap.min.js"\>\</script\>
+		`;
+
+		const yearly_js =
+		`const heatmap = new SimpleD3Heatmap();
+
+const ONE_HOUR_IN_MILLISECONDS = 3600000;
+const ONE_DAY_IN_MILLISECONDS = 86400000;
+
+// create random data for one year
+function generateYearData() {
+	let startDate = new Date(2017, 0).getTime();
+	const dataOfOneYear = {};
+
+	// create data for every day of the year
+	for (let i = 0; i < 365; i++) {
+		// add one day
+		const date = startDate + (ONE_DAY_IN_MILLISECONDS * i);
+
+		// add data to object with random value
+		dataOfOneYear[date] = Math.floor(Math.random() * 400);
+	}
+
+	// return our newly generated data
+	return dataOfOneYear;
+}
+
+// create calendar heatmap
+const generatedData = generateYearData();
+heatmap.yearly("yearlyCalendar", generatedData);
+		`;
+
+		const monthly_js =
+		`const heatmap = new SimpleD3Heatmap();
+
+const ONE_HOUR_IN_MILLISECONDS = 3600000;
+const ONE_DAY_IN_MILLISECONDS = 86400000;
+
+// generate random data for one month
+function generateMonthlyData() {
+	// initialize date object as february 2017, create dataOfOneMonth object
+	let startDate = new Date(2017, 1);
+	const dataOfOneMonth = {};
+
+	// convert date object to timestamp
+	startDate = startDate.getTime();
+
+	// go through all days in month (february has 28 days)
+	for (let i = 0; i < 28; i++) {
+		// grab startDate and add (ONE_DAY_IN_MILLISECONDS * i)
+		let dataTS = startDate + (ONE_DAY_IN_MILLISECONDS * i);
+
+		// go through 24 hours in one day
+		for (let j = 0; j < 24; j++) {
+			// add ONE_HOUR_IN_MILLISECONDS to dataTS
+			const dayHourTS = dataTS + (ONE_HOUR_IN_MILLISECONDS * j);
+
+			// only add the data to object if its between hours 6 and 18
+			if (j <= 18 && j >= 6) {
+				dataOfOneMonth[dayHourTS] = Math.floor(Math.random() * 30) + j;
+			}
+		}
+	}
+
+	// return our newly generated data
+	return dataOfOneMonth;
+}
+
+// create calendar heatmap
+const generatedData = generateMonthlyData();
+heatmap.monthly("monthlyCalendar", generatedData);
+		`;
+
+		const weekly_js =
+		`const heatmap = new SimpleD3Heatmap();
+
+const ONE_HOUR_IN_MILLISECONDS = 3600000;
+const ONE_DAY_IN_MILLISECONDS = 86400000;
+
+// create random data for one week
+function generateWeeklyData() {
+	// create date object @ february 2017 and convert it to a timestamp
+	let startDate = new Date(2017, 1, 5).getTime();
+	const dataOfOneWeek = {};
+
+	// a week has 7 days
+	for (let i = 0; i < 7; i++) {
+		const dayTS = startDate + (ONE_DAY_IN_MILLISECONDS * i);
+
+		// a day has 24 hours
+		for (let j = 0; j < 24; j++) {
+			const hourTS = dayTS + (ONE_HOUR_IN_MILLISECONDS * j);
+
+			// only add data if its between hours 6 and 18
+			if (j <= 18 && j >= 6) {
+				dataOfOneWeek[hourTS] = Math.floor(Math.random() * 50) + j;
+			}
+		}
+	}
+
+	// return our generated data
+	return dataOfOneWeek;
+}
+
+// create calendar heatmap
+const generatedData = generateWeeklyData();
+heatmap.weekly("weeklyCalendar", generatedData);
+		`;
+
+		const css = `.d3-calendar-tooltip {
+	background-color: white;
+	border: 2px solid #555;
+	color: black;
+	width: max-content;
+	padding: 3px 12px;
+}
+
+.d3-calendar-tooltip:after {
+	box-sizing: border-box;
+	display: inline;
+	font-size: 12px;
+	line-height: 1;
+	color: #555;
+	content: "\\25BC";
+	position: absolute;
+	left: 0px;
+	top: 24px;
+	text-align: center;
+}`;
+
+		new Jotted(document.querySelector("#editor_yearly"), {
+			files: [
+				{
+					type: "html",
+					content: yearly_html
+				},
+				{
+					type: "js",
+					content: yearly_js
+				},
+				{
+					type: "css",
+					content: css
+				}
+			],
+			plugins: ["ace"]
+		});
+
+		new Jotted(document.querySelector("#editor_monthly"), {
+			files: [
+				{
+					type: "html",
+					content: monthly_html
+				},
+				{
+					type: "js",
+					content: monthly_js
+				},
+				{
+					type: "css",
+					content: css
+				}
+			],
+			plugins: ["ace"]
+		});
+
+		new Jotted(document.querySelector("#editor_weekly"), {
+			files: [
+				{
+					type: "html",
+					content: weekly_html
+				},
+				{
+					type: "js",
+					content: weekly_js
+				},
+				{
+					type: "css",
+					content: css
+				}
+			],
+			plugins: ["ace"]
+		});
+		</script>
+	</body>
+</html>
