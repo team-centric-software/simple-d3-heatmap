@@ -57,7 +57,7 @@ Embed the `d3-heatmap.js` as well as [d3.js](https://d3js.org/) in your HTML
 <style>
 	.d3-calendar-tooltip {
 		background-color: white;
-		border: 2px solid #555;
+		border: 2px solid #111;
 		color: black;
 		width: max-content;
 		padding: 3px 12px;
@@ -69,7 +69,7 @@ Embed the `d3-heatmap.js` as well as [d3.js](https://d3js.org/) in your HTML
 		font-size: 12px;
 		width: 100%;
 		line-height: 1;
-		color: #555;
+		color: #111;
 		content: "\25BC";
 		position: absolute;
 		left: 0px;
