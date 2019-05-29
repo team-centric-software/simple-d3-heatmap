@@ -106,7 +106,8 @@ Creates an instance of SimpleD3Heatmap.
 | settings.showMonth | `boolean` | Show the months? | `true` | *Optional* |
 | settings.tooltipClass | `String` | CSS class for the tooltip | `"d3-calendar-tooltip"` | *Optional* |
 | settings.includeWeekend | `boolean` | Show saturday and sunday? Only for weekly calendar heatmap | `true` | *Optional* |
-| settings.mobileViewPx | `Number` | At how many pixels (width) change to mobile view? | `800` | *Optional* |
+| settings.mobileViewPx | `Number` | At how many pixels (width) change to mobile view? | `1200` | *Optional* |
+| settings.enableAnimations | `boolean` | Enable animations when rendering the calendar heatmaps | `true` | *Optional* |
 
 ##### Example
 
