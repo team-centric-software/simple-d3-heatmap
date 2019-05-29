@@ -231,12 +231,12 @@ class SimpleD3Heatmap {
 		// render the xAxis (Hours)
 		svg.append("g")
 			.attr("class", "timeLine")
-			.attr("style", `font-size: ${this.mobileView ? 16 : 12}px;`)
+			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
 			.call(xAxis);
 		
 		// render the yAxis (Dates)
 		svg.append("g")
-			.attr("style", `font-size: ${this.mobileView ? 16 : 12}px;`)
+			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
 			.call(yAxis);
 
 		// add square to heatmap
@@ -415,18 +415,18 @@ class SimpleD3Heatmap {
 		// render the xAxis (Hours)
 		svg.append("g")
 			.attr("class", "timeLine")
-			.attr("style", `font-size: ${this.mobileView ? 16 : 12}px;`)
+			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
 			.call(xAxis);
 		
 		// render the yAxis (Dates)
 		svg.append("g")
-			.attr("style", `font-size: ${this.mobileView ? 16 : 12}px;`)
+			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
 			.call(yAxis);
 
 		if (this.showMonth) {
 			// render the month and date at the top of the heatmap
 			svg.append("text")
-				.attr("style", `font-weight: 700; font-size: 22px; font-family: 'Tahoma';`)
+				.attr("style", `font-weight: 700; font-size: 22px; font-family: 'Tahoma', Arial, serif;`)
 				.text(date.toLocaleString(this.locale, { month: "long" }) + " - " + data[0].year)
 				.attr("x", -45)
 				.attr("y", -45);
@@ -572,7 +572,7 @@ class SimpleD3Heatmap {
 			.selectAll("text")
 			.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
 			.join("text")
-			.attr("style", `font-family: 'Tahoma'; font-size: ${this.mobileView ? 18 : 16}px`)
+			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 18 : 16}px`)
 			.attr("x", this.mobileView ? -5 + -cubeSize : -5)
 			.attr("y", (d, i) => { return (d + 0.5) * (cubeSize * this.scale) + (i * this.gutterSize); })
 			.attr("dy", "0.31em") // give it a little y space from top
@@ -588,7 +588,7 @@ class SimpleD3Heatmap {
 					.selectAll("text")
 					.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
 					.join("text")
-					.attr("style", `font-family: 'Tahoma'; font-size: ${this.mobileView ? 18 : 16}px`)
+					.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 18 : 16}px`)
 					.attr("x", -5 + -cubeSize)
 					.attr("y", (d, j) => { return (d + 0.5) * (cubeSize * this.scale) + (j * this.gutterSize) + (cubeSize * 8 * i) + (i * 15); })
 					.attr("dy", "0.31em") // give it a little y space from top
@@ -658,7 +658,7 @@ class SimpleD3Heatmap {
 				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
 				.enter()
 				.append("text")
-				.attr("style", `font-family: 'Tahoma'; font-size: ${this.mobileView ? 16 : 18}px`)
+				.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 18}px`)
 				.attr("x", function (d, i) {
 					// timeWeek.count(d3.utcYear(d), timeWeek.ceil(d))
 					// d3.utcMonday.count(d3.utcYear(d), d3.utcMonday.ceil(d))
