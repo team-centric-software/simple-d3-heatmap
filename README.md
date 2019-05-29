@@ -79,7 +79,7 @@ Embed the `d3-heatmap.js` as well as [d3.js](https://d3js.org/) in your HTML
 </style>
 ```
 
-Monthly heatmap calendar live preview: [JSFiddle Playground](https://jsfiddle.net/vwrjbaps/4/)
+Monthly heatmap calendar live preview and playground: [Click here](https://team-centric-software.github.io/simple-d3-heatmap/)
 
 Documentation
 -----------------
