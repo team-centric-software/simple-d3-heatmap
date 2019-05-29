@@ -19,6 +19,7 @@
  * @param {boolean} [settings.showMonth] Show the months?
  * @param {String} [settings.tooltipClass] CSS class for the tooltip
  * @param {boolean} [settings.includeWeekend] Show saturday and sunday? (Only weekly calendar heatmap)
+ * @param {Number} [settings.mobileViewPx] At how many pixels (width) change to "mobile view"?
  * 
  * @example 
  * const heatmap = new SimpleD3Heatmap({
@@ -62,6 +63,9 @@ class SimpleD3Heatmap {
 		this.includeWeekend = settings.includeWeekend || true;
 
 		this.tooltipClass = settings.tooltipClass || "d3-calendar-tooltip";
+
+		const minPix = settings.mobileViewPx || 800
+		this.mobileView = window.innerWidth < minPix ? true : false;
 
 		// check if tooltipDiv exists
 		if (d3.select("#tooltipDiv").empty()) {
@@ -113,7 +117,7 @@ class SimpleD3Heatmap {
 		const minValue = Math.min(...Object.values(data));
 
 		// Re-format our data => convert our ts to date/year/hour
-		let data2 = [];
+		const data2 = [];
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
 
@@ -129,10 +133,8 @@ class SimpleD3Heatmap {
 		});
 		data = data2;
 
-		const week = data[0].week;
-
 		let svg;
-		if (window.innerWidth > 800) {
+		if (!this.mobileView) {
 			const container = d3.select(`#${container_id}`)
 				.append("div")
 					.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 13%; vertical-align: top; overflow: hidden;`);
@@ -168,6 +170,7 @@ class SimpleD3Heatmap {
 			const day = new Date(2019, 0, i);
 			days.push(day.toLocaleString(this.locale, {weekday: this.dayNameLength}));
 		}
+		days.reverse();
 
 		// go through all days in the week
 		for (let i = 0; i < daysInWeek; i++) {
@@ -220,18 +223,18 @@ class SimpleD3Heatmap {
 		// Format the Ticks of the yAxis (Dates)
 		const yAxis = d3.axisLeft(y).tickFormat((d, i) => {
 			days.reverse();
-			return `${days[i]}`;
+			return `${d}`;
 		});
 
 		// render the xAxis (Hours)
 		svg.append("g")
 			.attr("class", "timeLine")
-			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
+			.attr("style", `font-size: ${this.mobileView ? 15 : 10}px;`)
 			.call(xAxis);
 		
 		// render the yAxis (Dates)
 		svg.append("g")
-			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
+			.attr("style", `font-size: ${this.mobileView ? 15 : 10}px;`)
 			.call(yAxis);
 
 		// add square to heatmap
@@ -240,7 +243,7 @@ class SimpleD3Heatmap {
 			.enter()
 			.append("rect")
 			.attr("x", function(d) { return x(d.hour) })
-			.attr("y", function(d) { 
+			.attr("y", function(d) {
 				return y(days[d.day]);
 			})
 			.attr("width", x.bandwidth() )
@@ -267,7 +270,7 @@ class SimpleD3Heatmap {
 				.style("opacity", 0);
 		}
 
-		// Remove every second tick
+		// Remove every second tick for beauty purposes
 		const ticks = svg.selectAll(".timeLine > .tick");
 
 		ticks.attr("class", function(d,i){
@@ -352,7 +355,7 @@ class SimpleD3Heatmap {
 		this.showMonth ? "" : height -= 50; // remove 50px which were needed for the "Month - Year" text
 
 		let svg;
-		if (window.innerWidth > 800) {
+		if (!this.mobileView) {
 			const container = d3.select(`#${container_id}`)
 			.append("div")
 				.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 48%; vertical-align: top; overflow: hidden;`);
@@ -411,18 +414,18 @@ class SimpleD3Heatmap {
 				weekday: this.dayNameLength,
 			});
 			// .text(date.toLocaleString(settings.locale, { month: "long" }) + " - " + data[0].year)
-			return `${dayMonth}, ${dayName}`;
+			return this.mobileView ? dayMonth : `${dayMonth}, ${dayName}`;
 		});
 
 		// render the xAxis (Hours)
 		svg.append("g")
 			.attr("class", "timeLine")
-			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
+			.attr("style", `font-size: ${this.mobileView ? 16 : 10}px;`)
 			.call(xAxis);
 		
 		// render the yAxis (Dates)
 		svg.append("g")
-			.attr("style", `font-size: ${window.innerWidth > 800 ? 10 : 15}px;`)
+			.attr("style", `font-size: ${this.mobileView ? 16 : 10}px;`)
 			.call(yAxis);
 
 		if (this.showMonth) {
@@ -536,10 +539,9 @@ class SimpleD3Heatmap {
 
 		// returns the given date's day as int (0 - 6)
 		const getDayOfDate = (d) => (new Date(d).getUTCDay() + 6) % 7;
-		const formatDay = d => days[d];
 
 		let svg;
-		if (window.innerWidth > 800) {
+		if (!this.mobileView) {
 			const container = d3.select(`#${container_id}`)
 				.append("div")
 					.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 12%; vertical-align: top; overflow: hidden;`);
@@ -576,11 +578,13 @@ class SimpleD3Heatmap {
 			.selectAll("text")
 			.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
 			.join("text")
-			.attr("style", `font-family: 'Tahoma'; font-size: ${window.innerWidth > 800 ? 16 : 18}px`)
+			.attr("style", `font-family: 'Tahoma'; font-size: ${this.mobileView ? 18 : 16}px`)
 			.attr("x", -5)
 			.attr("y", (d, i) => { return (d + 0.5) * (cubeSize * this.scale) + (i * this.gutterSize); })
 			.attr("dy", "0.31em") // give it a little y space from top
-			.text(formatDay);
+			.text((d) => {
+				return days[d];
+			});
 
 		// Re-format our data => convert our ts to date/month/year
 		const data2 = [];
@@ -642,13 +646,13 @@ class SimpleD3Heatmap {
 				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
 				.enter()
 				.append("text")
-				.attr("style", `font-family: 'Tahoma'; font-size: ${window.innerWidth > 800 ? 16 : 18}px`)
+				.attr("style", `font-family: 'Tahoma'; font-size: ${this.mobileView ? 16 : 18}px`)
 				.attr("x", function (d, i) {
 					// timeWeek.count(d3.utcYear(d), timeWeek.ceil(d))
 					// d3.utcMonday.count(d3.utcYear(d), d3.utcMonday.ceil(d))
 					const date = new Date(d);
 
-					if (window.innerWidth < 800) {
+					if (self.mobileView) {
 						if (d.getUTCMonth() >= 3 && d.getUTCMonth() <= 5) {
 							const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
 							return pos * (cubeSize * self.scale) - (cubeSize * 2) - (cubeSize * (3*5)) + cubeSize;
@@ -668,7 +672,7 @@ class SimpleD3Heatmap {
 					return pos * (cubeSize * self.scale);
 				})
 				.attr("y", (d) => {
-					if (window.innerWidth < 800) {
+					if (self.mobileView) {
 						if (d.getUTCMonth() >= 3 && d.getUTCMonth() <= 5) {
 							return 10 + (cubeSize * 8);
 						}
@@ -701,7 +705,7 @@ class SimpleD3Heatmap {
 			.attr("x", function (d, i) {
 				const date = new Date(d.ts);
 				
-				if (window.innerWidth < 800) {
+				if (self.mobileView) {
 					if (date.getUTCMonth() >= 3 && date.getUTCMonth() <= 5) {
 						const pos = d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth();
 						return pos * (cubeSize * self.scale) - (cubeSize) - (cubeSize * (3*5));
@@ -723,7 +727,7 @@ class SimpleD3Heatmap {
 				// return (d3.utcMonday.count(d3.utcYear(d.date), d.date) * (25 * self.scale)) + d3.utcMonday.count(d3.utcYear(d.date), d.date) * (self.gutterSize);
 			})
 			.attr("y", function (d) {
-				if (window.innerWidth < 800) {
+				if (self.mobileView) {
 					if (d.month >= 3 && d.month <= 5) {
 						return (getDayOfDate(d.ts) * (cubeSize * self.scale)) + getDayOfDate(d.ts) * (self.gutterSize) + 15 + (cubeSize * 8);
 					}
