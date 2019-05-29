@@ -163,7 +163,7 @@ class SimpleD3Heatmap {
 		}
 
 		// create localized weekdays (mo - fr)
-		let days = [];
+		const days = [];
 		for (let i = 0; i < daysInWeek; i++) {
 			const day = new Date(2019, 0, i);
 			days.push(day.toLocaleString(this.locale, {weekday: this.dayNameLength}));
@@ -291,7 +291,7 @@ class SimpleD3Heatmap {
 		const minValue = Math.min(...Object.values(data));
 
 		// Re-format our data => convert our ts to date/month/year/hour
-		let data2 = [];
+		const data2 = [];
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
 			data2.push({
@@ -528,7 +528,7 @@ class SimpleD3Heatmap {
 		const height = 7 * (cubeSize * this.scale) + (margin.top + margin.bottom);
 
 		// create localized weekdays (mo - fr)
-		let days = [];
+		const days = [];
 		for (let i = 0; i < 7; i++) {
 			const day = new Date(2019, 0, i);
 			days.push(day.toLocaleString(this.locale, {weekday: this.dayNameLength}));
@@ -556,13 +556,13 @@ class SimpleD3Heatmap {
 		} else {
 			const container = d3.select(`#${container_id}`)
 				.append("div")
-					.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 45%; vertical-align: top; overflow: hidden;`);
+					.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 166%; vertical-align: top; overflow: hidden;`);
 
 			// create our base - the svg
 			svg = container
 				.append("svg")
 					.attr("preserveAspectRatio", "xMinYMin meet")
-					.attr("viewBox", `${-margin.left} ${-margin.top} ${width / 2 + margin.left + margin.right} ${height * 2 + margin.top + margin.bottom}`)
+					.attr("viewBox", `${-margin.left} ${-margin.top} ${width / 4 + margin.left + margin.right} ${height * 4 + margin.top + margin.bottom + 15}`)
 					.attr("style", `display: inline-block; position: absolute; top: 0px; left: 0px;`)
 					.on("mouseout", function(d) {
 						tooltipDiv.style("display", "none")
@@ -582,22 +582,8 @@ class SimpleD3Heatmap {
 			.attr("dy", "0.31em") // give it a little y space from top
 			.text(formatDay);
 
-		if (window.innerWidth < 800) {
-			// add the weekdays (monday-sunday) at the second row
-			svg.append("g")
-				.attr("text-anchor", "end")
-				.selectAll("text")
-				.data(d3.range(7)) // d3.range(X) generates an array of numbers from 0 to X
-				.join("text")
-				.attr("style", `font-family: 'Tahoma'; font-size: ${window.innerWidth > 800 ? 16 : 18}px`)
-				.attr("x", -5)
-				.attr("y", (d, i) => { return (d + 1) * (cubeSize * this.scale) + (i * this.gutterSize) + (cubeSize * 8); })
-				.attr("dy", "0.31em") // give it a little y space from top
-				.text(formatDay);
-		}
-
 		// Re-format our data => convert our ts to date/month/year
-		let data2 = [];
+		const data2 = [];
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
 			data2.push({ 
@@ -663,9 +649,17 @@ class SimpleD3Heatmap {
 					const date = new Date(d);
 
 					if (window.innerWidth < 800) {
-						if (d.getUTCMonth() >= 6) {
+						if (d.getUTCMonth() >= 3 && d.getUTCMonth() <= 5) {
 							const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
-							return pos * (cubeSize * self.scale) - (cubeSize) - (cubeSize * (6*5));
+							return pos * (cubeSize * self.scale) - (cubeSize * 2) - (cubeSize * (3*5)) + cubeSize;
+						}
+						if (d.getUTCMonth() >= 5 && d.getUTCMonth() <= 8) {
+							const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
+							return pos * (cubeSize * self.scale) - (cubeSize * 3) - (cubeSize * (6*5)) + cubeSize;
+						}
+						if (d.getUTCMonth() >= 9 && d.getUTCMonth() <= 11) {
+							const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
+							return pos * (cubeSize * self.scale) - (cubeSize * 4) - (cubeSize * (9*5)) + cubeSize;
 						}
 					}
 
@@ -675,8 +669,14 @@ class SimpleD3Heatmap {
 				})
 				.attr("y", (d) => {
 					if (window.innerWidth < 800) {
-						if (d.getUTCMonth() >= 6) {
-							return 5 + (cubeSize * 8);
+						if (d.getUTCMonth() >= 3 && d.getUTCMonth() <= 5) {
+							return 10 + (cubeSize * 8);
+						}
+						if (d.getUTCMonth() >= 6 && d.getUTCMonth() <= 8) {
+							return 20 + (cubeSize * 16);
+						}
+						if (d.getUTCMonth() >= 9 && d.getUTCMonth() <= 11) {
+							return 30 + (cubeSize * 24);
 						}
 					}
 
@@ -702,9 +702,17 @@ class SimpleD3Heatmap {
 				const date = new Date(d.ts);
 				
 				if (window.innerWidth < 800) {
-					if (date.getUTCMonth() >= 6) {
-						const pos = d3.utcMonday.count(d3.utcYear(date), d3.utcMonday.ceil(date)) + date.getUTCMonth();
+					if (date.getUTCMonth() >= 3 && date.getUTCMonth() <= 5) {
+						const pos = d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth();
+						return pos * (cubeSize * self.scale) - (cubeSize) - (cubeSize * (3*5));
+					}
+					if (date.getUTCMonth() >= 6 && date.getUTCMonth() <= 8) {
+						const pos = d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth();
 						return pos * (cubeSize * self.scale) - (cubeSize * 2) - (cubeSize * (6*5));
+					}
+					if (date.getUTCMonth() >= 9 && date.getUTCMonth() <= 11) {
+						const pos = d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth();
+						return pos * (cubeSize * self.scale) - (cubeSize * 3) - (cubeSize * (9*5));
 					}
 				}
 				// d3.utcMonday => gets all "Monday-based" weeks
@@ -716,13 +724,19 @@ class SimpleD3Heatmap {
 			})
 			.attr("y", function (d) {
 				if (window.innerWidth < 800) {
-					if (d.month >= 6) {
-						return (getDayOfDate(d.ts) * (cubeSize * self.scale) + 0.5) + getDayOfDate(d.ts) * (self.gutterSize) + 10 + (cubeSize * 8);
+					if (d.month >= 3 && d.month <= 5) {
+						return (getDayOfDate(d.ts) * (cubeSize * self.scale)) + getDayOfDate(d.ts) * (self.gutterSize) + 15 + (cubeSize * 8);
+					}
+					if (d.month >= 6 && d.month <= 8) {
+						return (getDayOfDate(d.ts) * (cubeSize * self.scale)) + getDayOfDate(d.ts) * (self.gutterSize) + 25 + (cubeSize * 16);
+					}
+					if (d.month >= 9 && d.month <= 11) {
+						return (getDayOfDate(d.ts) * (cubeSize * self.scale)) + getDayOfDate(d.ts) * (self.gutterSize) + 35 + (cubeSize * 24);
 					}
 				}
 
 				// returns the day of the given date of the week (0-6, monday-sunday) * squareize to set the Y position (Monday at the top, Sunday at the bottom)
-				return (getDayOfDate(d.ts) * (cubeSize * self.scale) + 0.5) + getDayOfDate(d.ts) * (self.gutterSize);
+				return (getDayOfDate(d.ts) * (cubeSize * self.scale)) + getDayOfDate(d.ts) * (self.gutterSize);
 			})
 			.attr("style", function (d, i) {
 				return `animation: simple-d3-heatmaps-cubeanim 0.25s ease-out ${0.00075 * i}s; animation-fill-mode: backwards;`;
