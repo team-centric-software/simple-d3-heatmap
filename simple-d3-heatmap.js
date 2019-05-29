@@ -556,7 +556,7 @@ class SimpleD3Heatmap {
 			}
 		} else {
 			container.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 170%; vertical-align: top; overflow: hidden;`);
-			+
+			
 			svg.attr("viewBox", `${-margin.left} ${-margin.top} ${width / 4 + margin.left + margin.right} ${height * 4 + margin.top + margin.bottom + 25}`)
 			
 			// fill days
