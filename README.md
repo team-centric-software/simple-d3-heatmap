@@ -104,8 +104,8 @@ Creates an instance of SimpleD3Heatmap.
 | settings.locale | `String` | Locale - language used for months, weekdays and date formats | `"en-US"` | *Optional* |
 | settings.dayNameLength | `String` | Defines the weekday format (long => "Friday", short => "Fri" or narrow => "F") | `"long"` | *Optional* |
 | settings.showMonth | `boolean` | Show the months? | `true` | *Optional* |
-| settings.tooltipClass | `String` | CSS class for the tooltip | `"d3-calendar-tooltip"` | *Optional* |
 | settings.includeWeekend | `boolean` | Show saturday and sunday? Only for weekly calendar heatmap | `true` | *Optional* |
+| settings.tooltipClass | `String` | CSS class for the tooltip | `"d3-calendar-tooltip"` | *Optional* |
 | settings.mobileViewPx | `Number` | At how many pixels (width) change to mobile view? | `1200` | *Optional* |
 | settings.enableAnimations | `boolean` | Enable animations when rendering the calendar heatmaps | `true` | *Optional* |
 
@@ -126,6 +126,11 @@ const heatmap = new SimpleD3Heatmap({
 	locale: "de-DE", // defines the format of the date in the axis
 	dayNameLength: "short", // style of the displayed weekday, options => long: "Friday", short: "Fri", narrow: "F" (uses locale)
 	showMonth: true, // displays the months (uses locale)
+	includeWeekend: true, // include the weekend in weekly calendar or only monday till friday?
+
+	tooltipClass: "d3-calendar-tooltip", // class of the tooltip
+	mobileViewPx: 1200, // at which width change to mobileview?
+	enableAnimations: true, // enable animations when rendering calendar?
 })
 ```
 
