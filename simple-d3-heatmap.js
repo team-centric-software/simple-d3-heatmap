@@ -229,12 +229,12 @@ class SimpleD3Heatmap {
 		// render the xAxis (Hours)
 		svg.append("g")
 			.attr("class", "timeLine")
-			.attr("style", `font-size: ${this.mobileView ? 15 : 10}px;`)
+			.attr("style", `font-size: ${this.mobileView ? 16 : 10}px;`)
 			.call(xAxis);
 		
 		// render the yAxis (Dates)
 		svg.append("g")
-			.attr("style", `font-size: ${this.mobileView ? 15 : 10}px;`)
+			.attr("style", `font-size: ${this.mobileView ? 16 : 10}px;`)
 			.call(yAxis);
 
 		// add square to heatmap
