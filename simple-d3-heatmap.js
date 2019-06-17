@@ -21,27 +21,27 @@
  * @param {boolean} [settings.includeWeekend] Show saturday and sunday? (Only weekly calendar heatmap)
  * @param {Number} [settings.mobileViewPx] At how many pixels (width) change to "mobile view"?
  * @param {Number} [settings.enableAnimations] Enable animations when rendering the calendar heatmaps
- * 
- * @example 
+ *
+ * @example
  * const heatmap = new SimpleD3Heatmap({
  *     minColor: "#ECF5E2", // lowest datapoint's color in the heatmap - e.g. rgb(0, 255, 0) or #00ff00
  *     maxColor: "#222081", // highest datapoint's color in the heatmap - e.g. rgb(255, 255, 0) or #ffff00
  *     colorMode: 2, // switches between color scales (1: linear, 2: sqrt and 3: cubehelix)
- *     
+ *
  *     gutterSize: 0.1, // distance inbetween the squares (range: 0-1)
  *     outerSize: 0.35, // distance inbetween axis x, y and the squares
  *     scale: 0.8, // scale of the heatmap
- *     
+ *
  *     showLines: false, // show the axis line
  *     showTicks: true, // show the axis ticks
  *     locale: "de-DE", // defines the format of the date in the axis
  *     dayNameLength: "long", // style of the displayed weekday, options => long: "Friday", short: "Fri", narrow: "F" (uses locale)
  *     showMonth: true, // displays the months (uses locale)
  *     includeWeekend: true, // Show saturday and sunday? Only for weekly calendar heatmap
- *     
+ *
  *     tooltipClass: "d3-calendar-tooltip" // CSS class for the tooltip
  * })
- * 
+ *
  * @class
  */
 class SimpleD3Heatmap {
@@ -110,7 +110,7 @@ class SimpleD3Heatmap {
 		const daysInWeek = this.includeWeekend ? 7 : 5;
 
 		const tooltipDiv = d3.select("#tooltipDiv");
-		
+
 		const margin = { left: 75, right: 25, top: 25, bottom: 10 };
 		const width = (715 * this.scale) - (margin.left + margin.right);
 		const height = (this.includeWeekend ? 225 : 175 * this.scale) - (margin.top + margin.bottom);
@@ -153,7 +153,7 @@ class SimpleD3Heatmap {
 
 		if (!this.mobileView) {
 			container.attr("style", `display: inline-block; position: relative; width: 40%; padding-bottom: 13%; vertical-align: top; overflow: hidden;`);
-		
+
 			// create days, localized and push them into `days`
 			for (let i = 0; i < daysInWeek; i++) {
 				const day = new Date(2019, 0, i);
@@ -233,7 +233,7 @@ class SimpleD3Heatmap {
 			.attr("class", "timeLine")
 			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
 			.call(xAxis);
-		
+
 		// render the yAxis (Dates)
 		svg.append("g")
 			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
@@ -269,7 +269,7 @@ class SimpleD3Heatmap {
 			svg.selectAll("path")
 			.style("opacity", 0);
 		}
-		
+
 		// hide all ticks if false
 		if (!this.showTicks) {
 			svg.selectAll("line")
@@ -283,7 +283,7 @@ class SimpleD3Heatmap {
 			if(i % 2 != 0) d3.select(this).remove();
 		});
 	}
-	
+
 	/**
 	 * Creates a monthly heatmap
 	 *
@@ -417,7 +417,7 @@ class SimpleD3Heatmap {
 			.attr("class", "timeLine")
 			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
 			.call(xAxis);
-		
+
 		// render the yAxis (Dates)
 		svg.append("g")
 			.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 12}px;`)
@@ -495,7 +495,7 @@ class SimpleD3Heatmap {
 				// console.log(d.day, spacing);
 				return `M${8 * self.scale},${height} L${width - (8 * self.scale)},${height}`;
 			});
-		
+
 		// hide all ticks if false
 		if (!this.showTicks) {
 			svg.selectAll("line")
@@ -548,7 +548,7 @@ class SimpleD3Heatmap {
 			container.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 12%; vertical-align: top; overflow: hidden;`);
 
 			svg.attr("viewBox", `${-margin.left} ${-margin.top} ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-		
+
 			// fill days
 			for (let i = 0; i < 7; i++) {
 				const day = new Date(2019, 0, i);
@@ -556,9 +556,9 @@ class SimpleD3Heatmap {
 			}
 		} else {
 			container.attr("style", `display: inline-block; position: relative; width: 100%; padding-bottom: 170%; vertical-align: top; overflow: hidden;`);
-			
+
 			svg.attr("viewBox", `${-margin.left} ${-margin.top} ${width / 4 + margin.left + margin.right} ${height * 4 + margin.top + margin.bottom + 25}`)
-			
+
 			// fill days
 			for (let i = 0; i < 7; i++) {
 				const day = new Date(2019, 0, i);
@@ -602,7 +602,7 @@ class SimpleD3Heatmap {
 		const data2 = [];
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
-			data2.push({ 
+			data2.push({
 				ts: date.getTime(),
 				date: date.getUTCDate(),
 				month: date.getUTCMonth(),
@@ -646,16 +646,16 @@ class SimpleD3Heatmap {
 				});
 			}
 		}
-		
+
 		// sort by date
 		data.sort((a, b) => {
 			return a.ts - b.ts;
 		});
-		
+
 		if (this.showMonth) {
 			// add the month labels
 			svg.selectAll()
-				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
+				.data(d3.utcMonths(new Date(data[0].year, -1, data[0].date), new Date(data[0].year, 11, data[0].date)))
 				.enter()
 				.append("text")
 				.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 18}px`)
@@ -708,7 +708,7 @@ class SimpleD3Heatmap {
 		data.sort((a, b) => {
 			return a.month - b.month
 		});
-		
+
 		// returns the given date's day as int (0 - 6)
 		const getDayOfDate = (d) => (new Date(d).getUTCDay() + 6) % 7;
 
@@ -719,7 +719,7 @@ class SimpleD3Heatmap {
 			.append("rect")
 			.attr("x", function (d, i) {
 				const date = new Date(d.ts);
-				
+
 				if (self.mobileView) {
 					if (date.getUTCMonth() >= 3 && date.getUTCMonth() <= 5) {
 						const pos = d3.utcMonday.count(d3.utcYear(date), date) + date.getUTCMonth();
