@@ -674,10 +674,16 @@ class SimpleD3Heatmap {
 			return a.ts - b.ts;
 		});
 
+		const dates = d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date));
+		if (dates.length > 12) {
+			const datesToRemove = dates.length - 12;
+			dates.splice(12, datesToRemove);
+		}
+
 		if (this.showMonth) {
 			// add the month labels
 			svg.selectAll()
-				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
+				.data(dates)
 				.enter()
 				.append("text")
 				.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 18}px`)
