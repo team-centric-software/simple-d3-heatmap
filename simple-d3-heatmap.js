@@ -115,10 +115,6 @@ class SimpleD3Heatmap {
 		const width = (715 * this.scale) - (margin.left + margin.right);
 		const height = (this.includeWeekend ? 225 : 175 * this.scale) - (margin.top + margin.bottom);
 
-		// get the smallest and highest values out of the data
-		const maxValue = Math.max(...Object.values(data));
-		const minValue = Math.min(...Object.values(data));
-
 		// Re-format our data => convert our ts to date/year/hour
 		const data2 = [];
 		d3.keys(data).map((d) => {
@@ -177,9 +173,9 @@ class SimpleD3Heatmap {
 			// go through all 24 hours
 			for (let j = 0; j < 24; j++) {
 				// check if data for this time exists
-				const item = data.find(el => el.day === i && el.hour === j);
+				const itemIndex = data.findIndex(el => el.day === i && el.hour === j);
 				// if data does not exist, create a new object with specified day and hour and no value
-				if (!item) {
+				if (itemIndex === -1) {
 					data.push({
 						day: parseFloat(i), // range: 0-6
 						hour: parseFloat(j), // range: 0 - 23
@@ -187,8 +183,24 @@ class SimpleD3Heatmap {
 						value: 0 // e.g. 5
 					});
 				}
+
+				const multiple = data.findIndex(el => el.day === i && el.hour === j);
+				if (multiple.length > 1) {
+					multiple.forEach((item, i) => {
+						if (i !== 0) {
+							data[itemIndex].value += item.value;
+
+							const index = data.findIndex(el => el === item);
+							data.splice(index, 1);
+						}
+					});
+				}
 			}
 		}
+
+		const values = Object.values(data).map((el) => { return el.value });
+		const maxValue = Math.max(...values);
+		const minValue = Math.min(...values);
 
 		// sort the data by day then by hour
 		data.sort((a, b) => {
@@ -296,10 +308,6 @@ class SimpleD3Heatmap {
 
 		const tooltipDiv = d3.select("#tooltipDiv");
 
-		// get the smallest and highest values out of the data
-		const maxValue = Math.max(...Object.values(data));
-		const minValue = Math.min(...Object.values(data));
-
 		// Re-format our data => convert our ts to date/month/year/hour
 		const data2 = [];
 		d3.keys(data).map((d) => {
@@ -325,9 +333,9 @@ class SimpleD3Heatmap {
 			// go through all 24 hours
 			for (let j = 0; j < 24; j++) {
 				// check if data for this time exists
-				const item = data.find(el => el.day === i && el.hour === j);
+				const itemIndex = data.findIndex(el => el.day === i && el.hour === j);
 				// if data does not exist, create a new object with specified day and hour and no value
-				if (!item) {
+				if (itemIndex === -1) {
 					data.push({
 						day: i,
 						hour: j,
@@ -336,8 +344,24 @@ class SimpleD3Heatmap {
 						value: 0,
 					});
 				}
+
+				const multiple = data.filter(el => el.day === i && el.hour === j);
+				if (multiple.length > 1) {
+					multiple.forEach((item, i) => {
+						if (i !== 0) {
+							data[itemIndex].value += item.value;
+
+							const index = data.findIndex(el => el === item);
+							data.splice(index, 1);
+						}
+					});
+				}
 			}
 		}
+
+		const values = Object.values(data).map((el) => { return el.value });
+		const maxValue = Math.max(...values);
+		const minValue = Math.min(...values);
 
 		// sort our data (needed for animation)
 		data.sort((a, b) => {
@@ -492,7 +516,6 @@ class SimpleD3Heatmap {
 			.attr("stroke-width", `${3 * this.scale}px`)
 			.attr("d", (d, i) => {
 				const height = ((spacing - (0.11 * self.scale) * (i + 1)) * (d.day + 1)) + (7 * self.scale);
-				// console.log(d.day, spacing);
 				return `M${8 * self.scale},${height} L${width - (8 * self.scale)},${height}`;
 			});
 
@@ -520,9 +543,6 @@ class SimpleD3Heatmap {
 	yearly(container_id, data) {
 		const self = this;
 		const tooltipDiv = d3.select("#tooltipDiv");
-
-		const maxValue = Math.max(...Object.values(data));
-		const minValue = Math.min(...Object.values(data));
 
 		const cubeSize = 25;
 		// set our margin's, width and height
@@ -645,7 +665,24 @@ class SimpleD3Heatmap {
 					value: 0,
 				});
 			}
+
+			// check if we have multiple entries for the same day/month/year
+			const multiple = data.filter(el => el.date === day && el.month === month && el.year === year);
+			if (multiple.length > 1) {
+				multiple.forEach((item, i) => {
+					if (i !== 0) {
+						data[itemIndex].value += item.value;
+
+						const index = data.findIndex(el => el === item);
+						data.splice(index, 1);
+					}
+				});
+			}
 		}
+
+		const values = Object.values(data).map((el) => { return el.value });
+		const maxValue = Math.max(...values);
+		const minValue = Math.min(...values);
 
 		// sort by date
 		data.sort((a, b) => {
@@ -655,7 +692,7 @@ class SimpleD3Heatmap {
 		if (this.showMonth) {
 			// add the month labels
 			svg.selectAll()
-				.data(d3.utcMonths(new Date(data[0].year, -1, data[0].date), new Date(data[0].year, 11, data[0].date)))
+				.data(d3.utcMonths(new Date(data[0].year, data[0].month, data[0].date), new Date(data[data.length - 1].year, data[data.length - 1].month, data[data.length - 1].date)))
 				.enter()
 				.append("text")
 				.attr("style", `font-family: 'Tahoma', Arial, serif; font-size: ${this.mobileView ? 16 : 18}px`)
@@ -699,8 +736,7 @@ class SimpleD3Heatmap {
 					return -5;
 				})
 				.text((d) => {
-					const date = new Date(d);
-					return date.toLocaleString(this.locale, { month: "short" }) + " - " + date.getUTCFullYear();
+					return d.toLocaleString(this.locale, { month: "short" }) + " - " + d.getUTCFullYear();
 				});
 		}
 
