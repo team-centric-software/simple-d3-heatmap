@@ -120,6 +120,12 @@ class SimpleD3Heatmap {
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
 
+			const existsIndex = data2.findIndex(el => el.day === date.getUTCDay() && el.hour === date.getUTCHours());
+			if (existsIndex !== -1) {
+				data2[existsIndex].value += parseFloat(data[d]);
+				return;
+			}
+
 			if (date.getUTCDay() + 1 <= daysInWeek) {
 				data2.push({
 					day: date.getUTCDay(),
@@ -181,18 +187,6 @@ class SimpleD3Heatmap {
 						hour: parseFloat(j), // range: 0 - 23
 						year: parseFloat(data[0].year), // e.g. 2017
 						value: 0 // e.g. 5
-					});
-				}
-
-				const multiple = data.findIndex(el => el.day === i && el.hour === j);
-				if (multiple.length > 1) {
-					multiple.forEach((item, i) => {
-						if (i !== 0) {
-							data[itemIndex].value += item.value;
-
-							const index = data.findIndex(el => el === item);
-							data.splice(index, 1);
-						}
 					});
 				}
 			}
@@ -312,6 +306,13 @@ class SimpleD3Heatmap {
 		const data2 = [];
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
+
+			const existsIndex = data2.findIndex(el => el.day === (date.getUTCDate() - 1) && el.hour === date.getUTCHours());
+			if (existsIndex !== -1) {
+				data2[existsIndex].value += parseFloat(data[d]);
+				return;
+			}
+
 			data2.push({
 				day: date.getUTCDate() - 1,
 				hour: date.getUTCHours(),
@@ -320,7 +321,9 @@ class SimpleD3Heatmap {
 				value: parseFloat(data[d])
 			});
 		});
+		console.log(data);
 		data = data2;
+		console.log(data);
 
 		// create a date object from our current month and year
 		const date = new Date(data[0].year, data[0].month + 1, 0);
@@ -342,18 +345,6 @@ class SimpleD3Heatmap {
 						month: data[0].month,
 						year: data[0].year,
 						value: 0,
-					});
-				}
-
-				const multiple = data.filter(el => el.day === i && el.hour === j);
-				if (multiple.length > 1) {
-					multiple.forEach((item, i) => {
-						if (i !== 0) {
-							data[itemIndex].value += item.value;
-
-							const index = data.findIndex(el => el === item);
-							data.splice(index, 1);
-						}
 					});
 				}
 			}
@@ -622,6 +613,13 @@ class SimpleD3Heatmap {
 		const data2 = [];
 		d3.keys(data).map((d) => {
 			const date = new Date(parseInt(d, 10));
+
+			const existsIndex = data2.findIndex(el => el.date === date.getUTCDate() && el.month === date.getUTCMonth() && el.year === date.getUTCFullYear());
+			if (existsIndex !== -1) {
+				data2[existsIndex].value += parseFloat(data[d]);
+				return;
+			}
+
 			data2.push({
 				ts: date.getTime(),
 				date: date.getUTCDate(),
@@ -663,19 +661,6 @@ class SimpleD3Heatmap {
 					month: month,
 					year: year,
 					value: 0,
-				});
-			}
-
-			// check if we have multiple entries for the same day/month/year
-			const multiple = data.filter(el => el.date === day && el.month === month && el.year === year);
-			if (multiple.length > 1) {
-				multiple.forEach((item, i) => {
-					if (i !== 0) {
-						data[itemIndex].value += item.value;
-
-						const index = data.findIndex(el => el === item);
-						data.splice(index, 1);
-					}
 				});
 			}
 		}
