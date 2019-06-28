@@ -1,5 +1,8 @@
-README
+simple-d3-heatmap
 ======
+
+A javascript module to create heatmap calendars\
+Demo: https://team-centric-software.github.io/simple-d3-heatmap/
 
 Description
 -----------------
